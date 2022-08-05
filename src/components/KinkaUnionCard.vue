@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div ref="root">
     <v-file-input v-model="file" accept="image/*" label="組合員の写真を選択してください" @change="onChangeFileInput" />
     <v-btn @click="rotate" v-if="file != []"><v-icon>mdi-file-rotate-right</v-icon>ROTATE</v-btn>
     <!-- <v-btn @click="cropImage" v-if="file != []">crop</v-btn> -->
@@ -14,7 +14,6 @@
       :background="true"
       :rotatable="true"
       alt="Source Image"
-      :img-style="imgStyle"
       :aspect-ratio="3 / 4"
       preview=".photoPreview"
       @cropend="cropImage"
@@ -23,12 +22,12 @@
       <v-card-title>プレビュー</v-card-title>
       <v-row>
         <v-col>
-          <div class="cardPreview" ref="cardPreview">
+          <div class="cardPreview" ref="cardPreview" :style="`zoom: ${zoom}`">
             <v-img src="../assets/cardBG.png" />
             <div class="photoPreview"></div>
             <div class="infoPreview pa-10">
               <v-card-title class="memberNo ma-2">組合員No. {{ memberNo }}</v-card-title>
-              <v-card-title class="division ma-2">{{ division }}支部</v-card-title>
+              <v-card-title class="division ma-2">{{ division }}{{ divisionType }}</v-card-title>
               <div class="memberName">{{ memberName }}</div>
             </div>
           </div>
@@ -47,7 +46,6 @@
 <style scoped>
 .cardPreview {
   position: relative;
-  zoom: 0.25;
   width: 1920px;
 }
 .photoPreview {
@@ -58,7 +56,7 @@
   top: 390px;
   left: 200px;
   border-radius: 24px;
-  background-color: rgba(255, 183, 0, 0.369);
+  background-color: rgba(255, 183, 0, 0.5);
 }
 .infoPreview {
   width: 976px;
@@ -106,17 +104,24 @@ import "cropperjs/dist/cropper.css";
   },
 })
 export default class KinkaUnionCard extends Vue {
-  private imgStyle = {
-    width: "400px",
-    height: "300px",
-  };
   private imgSrc?: string | ArrayBuffer | null = "";
   private cropedImg?: string | ArrayBuffer | null = "";
   private file: File[] = [];
   private memberNo = "2222";
   private division = "ﾌｫｰﾝ";
   private memberName = "ハツキ";
+  private divisionType = "支部";
 
+  get mobile(): boolean {
+    return this.$vuetify.breakpoint.mobile;
+  }
+
+  get zoom(): number {
+    const dispWidth = this.$vuetify.breakpoint.width; // - this.$vuetify.breakpoint.scrollBarWidth;
+    const root = this.$refs.root as HTMLElement;
+    const [marginTortalm, previewOriginalWidth, maxZoom] = [48, 1920, 0.25];
+    return Math.min((dispWidth - marginTortalm) / previewOriginalWidth, maxZoom);
+  }
   private onChangeFileInput() {
     console.log(this.file);
     const cropper: VueCropper = this.$refs.cropper as VueCropper;
@@ -161,12 +166,7 @@ export default class KinkaUnionCard extends Vue {
 
   private async download() {
     const preview: HTMLElement = this.$refs.cardPreview as HTMLElement;
-    const params: Parameters<typeof html2canvas> = [
-      preview,
-      {
-        // オプションを指定、一旦飛ばします
-      },
-    ];
+    const params: Parameters<typeof html2canvas> = [preview, {}];
     const canvasElement = await html2canvas(...params).catch((e) => {
       console.error(e);
       return;

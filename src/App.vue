@@ -4,7 +4,7 @@
       <v-card-title>キンカ組合へようこそ</v-card-title>
       <v-spacer></v-spacer>
       <v-btn href="https://twitter.com/okigirl25" target="_blank" text>
-        <span class="mr-2">contact marketU</span>
+        <span class="mr-2" v-show="!mobile">contact</span>
         <v-icon>mdi-twitter</v-icon>
       </v-btn>
     </v-app-bar>
@@ -16,13 +16,12 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
+import { Vue, Component } from "vue-property-decorator";
 
-export default Vue.extend({
-  name: "App",
-
-  data: () => ({
-    //
-  }),
-});
+@Component
+export default class App extends Vue {
+  get mobile(): boolean {
+    return this.$vuetify.breakpoint.mobile;
+  }
+}
 </script>
