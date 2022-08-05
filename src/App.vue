@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <v-app-bar app color="primary" dark>
-      <v-card-title class="title">キンカ組合へようこそ</v-card-title>
+      <v-card-title class="welcome">キンカ組合へようこそ</v-card-title>
       <v-spacer></v-spacer>
       <v-btn href="https://twitter.com/okigirl25" target="_blank" text>
         <span class="mr-2" v-show="!mobile">contact</span>
@@ -16,9 +16,9 @@
 </template>
 
 <style scoped>
-.title {
-  font-family: "Murecho";
-  font-weight: bold;
+@import url("https://fonts.googleapis.com/css2?family=Murecho:wght@300;500&display=swap");
+.welcome {
+  font-family: "Murecho", sans-serif;
 }
 </style>
 

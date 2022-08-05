@@ -1,27 +1,61 @@
 <template>
-  <div ref="root">
-    <v-file-input v-model="file" accept="image/*" label="組合員の写真を選択してください" @change="onChangeFileInput" />
-    <v-btn @click="rotate" v-if="file != []"><v-icon>mdi-file-rotate-right</v-icon>ROTATE</v-btn>
-    <!-- <v-btn @click="cropImage" v-if="file != []">crop</v-btn> -->
-    <vue-cropper
-      ref="cropper"
-      :guides="true"
-      :view-mode="2"
-      drag-mode="crop"
-      :auto-crop-area="0.5"
-      :min-container-width="250"
-      :min-container-height="180"
-      :background="true"
-      :rotatable="true"
-      alt="Source Image"
-      :aspect-ratio="3 / 4"
-      preview=".photoPreview"
-      @cropend="cropImage"
-    />
+  <div>
+    <v-card class="ma-3 pa-3">
+      <v-card-title>お写真登録</v-card-title>
+      <v-row>
+        <v-col align="center" cols="12" md="6">
+          <vue-cropper
+            ref="cropper"
+            class="ma-3 cropper"
+            :guides="true"
+            :view-mode="2"
+            drag-mode="crop"
+            :auto-crop-area="0.5"
+            :min-container-width="250"
+            :min-container-height="180"
+            :background="true"
+            :rotatable="true"
+            alt="No Image..."
+            :aspect-ratio="3 / 4"
+            preview=".photoPreview"
+            @cropend="cropImage"
+          />
+        </v-col>
+        <v-col class="pa-3" cols="12" md="6">
+          <v-file-input
+            class="ma-3"
+            v-model="file"
+            accept="image/*"
+            label="組合員の写真を選択してください"
+            @change="onChangeFileInput"
+            :clearable="false"
+          />
+          <div class="toolButtons" style="text-align: center">
+            <v-btn @click="rotate(-90)" :disabled="!file" icon color="primary"
+              ><v-icon>mdi-file-rotate-left</v-icon></v-btn
+            >
+            <v-btn @click="rotate(90)" :disabled="!file" icon color="primary"
+              ><v-icon>mdi-file-rotate-right</v-icon></v-btn
+            >
+            <v-btn @click="move(-10, 0)" :disabled="!file" icon color="primary"><v-icon>mdi-arrow-left</v-icon></v-btn>
+            <v-btn @click="move(10, 0)" :disabled="!file" icon color="primary"><v-icon>mdi-arrow-right</v-icon></v-btn>
+            <v-btn @click="move(0, -10)" :disabled="!file" icon color="primary"><v-icon>mdi-arrow-up</v-icon></v-btn>
+            <v-btn @click="move(0, 10)" :disabled="!file" icon color="primary"><v-icon>mdi-arrow-down</v-icon></v-btn>
+            <v-btn @click="relativeZoom(0.1)" :disabled="!file" icon color="primary"
+              ><v-icon>mdi-magnify-plus</v-icon></v-btn
+            >
+            <v-btn @click="relativeZoom(-0.1)" :disabled="!file" icon color="primary"
+              ><v-icon>mdi-magnify-minus</v-icon></v-btn
+            >
+            <v-btn @click="reset()" :disabled="!file" icon color="primary"><v-icon>mdi-undo-variant</v-icon></v-btn>
+          </div>
+        </v-col>
+      </v-row>
+    </v-card>
     <v-card class="ma-3 pa-3">
       <v-card-title>プレビュー</v-card-title>
       <v-row>
-        <v-col>
+        <v-col align="center">
           <div class="cardPreview" ref="cardPreview" :style="`zoom: ${zoom}`">
             <v-img src="../assets/cardBG.png" />
             <div class="photoPreview"></div>
@@ -36,7 +70,10 @@
           <v-text-field label="組合員No." v-model="memberNo" />
           <v-text-field label="支部名" v-model="division" />
           <v-text-field label="おなまえ" v-model="memberName" />
-          <v-btn @click="download" v-if="file != []"><v-icon>mdi-download</v-icon>download</v-btn>
+          <v-card-actions>
+            <v-spacer />
+            <v-btn @click="download" :disabled="!file"><v-icon>mdi-download</v-icon>download</v-btn>
+          </v-card-actions>
         </v-col>
       </v-row>
     </v-card>
@@ -53,7 +90,7 @@
   height: 632px;
   overflow: hidden;
   position: absolute;
-  top: 390px;
+  top: 385px;
   left: 200px;
   border-radius: 24px;
   background-color: rgba(255, 183, 0, 0.5);
@@ -63,15 +100,19 @@
   height: 632px;
   overflow: hidden;
   position: absolute;
-  top: 390px;
+  top: 385px;
   left: 746px;
   border-radius: 24px;
   text-align: center;
-  background-color: white;
+  background-color: rgb(255, 255, 255);
+  /* border: dashed 1px silver; */
   display: flex;
   flex-direction: column;
   font-family: "Murecho";
+  font-weight: 300;
   color: rgb(74, 45, 19);
+  -webkit-text-size-adjust: auto;
+  box-shadow: rgba(255, 183, 0, 0.5);
 }
 .memberNo {
   font-size: 60px;
@@ -82,7 +123,7 @@
   line-height: 80px;
 }
 .memberName {
-  font-weight: bold;
+  font-weight: 500;
   text-align: center;
   flex-grow: 1;
   font-size: 84px;
@@ -90,6 +131,12 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+}
+.cropper {
+  max-width: 400px;
+  min-height: 300px;
+  background-color: rgb(255, 207, 87);
+  text-align: center;
 }
 </style>
 <script lang="ts">
@@ -106,11 +153,15 @@ import "cropperjs/dist/cropper.css";
 export default class KinkaUnionCard extends Vue {
   private imgSrc?: string | ArrayBuffer | null = "";
   private cropedImg?: string | ArrayBuffer | null = "";
-  private file: File[] = [];
-  private memberNo = "2222";
-  private division = "ﾌｫｰﾝ";
-  private memberName = "ハツキ";
+  private file = null;
+  private memberNo = "";
+  private division = "";
+  private memberName = "";
   private divisionType = "支部";
+
+  get filled(): boolean {
+    return this.file != null && this.memberNo !== "" && this.memberName !== "" && this.division !== "";
+  }
 
   get mobile(): boolean {
     return this.$vuetify.breakpoint.mobile;
@@ -123,11 +174,10 @@ export default class KinkaUnionCard extends Vue {
     return Math.min((dispWidth - marginTortalm) / previewOriginalWidth, maxZoom);
   }
   private onChangeFileInput() {
-    console.log(this.file);
     const cropper: VueCropper = this.$refs.cropper as VueCropper;
-    if (this.file === null) {
-      this.file = [];
-      cropper.replace(null);
+    if (this.file == null) {
+      console.log("kuraisimasu");
+      cropper.destroy();
     } else {
       cropper.replace(URL.createObjectURL(this.file));
     }
@@ -158,15 +208,29 @@ export default class KinkaUnionCard extends Vue {
     const cropper = this.$refs.cropper as VueCropper;
     this.cropedImg = cropper.getCroppedCanvas().toDataURL();
   }
-  private rotate() {
+  private rotate(deg: number) {
     // guess what this does :)
     const cropper = this.$refs.cropper as VueCropper;
-    cropper.rotate(90);
+    cropper.rotate(deg);
   }
 
+  private move(offsetX: number, offsetY: number) {
+    const cropper = this.$refs.cropper as VueCropper;
+    cropper.move(offsetX, offsetY);
+  }
+
+  private relativeZoom(ratio: number) {
+    const cropper = this.$refs.cropper as VueCropper;
+    cropper.relativeZoom(ratio);
+  }
+
+  private reset(ratio: number) {
+    const cropper = this.$refs.cropper as VueCropper;
+    cropper.reset();
+  }
   private async download() {
     const preview: HTMLElement = this.$refs.cardPreview as HTMLElement;
-    const params: Parameters<typeof html2canvas> = [preview];
+    const params: Parameters<typeof html2canvas> = [preview, { scale: 1 }];
     const canvasElement = await html2canvas(...params).catch((e) => {
       console.error(e);
       return;
@@ -175,15 +239,11 @@ export default class KinkaUnionCard extends Vue {
       return;
     }
     const dataURL = canvasElement.toDataURL("image/png");
-    fetch(dataURL)
-      .then((res) => res.blob())
-      .then((blob) => {
-        const blob_url = URL.createObjectURL(blob);
-        let link = document.createElement("a");
-        link.href = dataURL;
-        link.download = `${this.memberNo}_${this.division}_${this.memberName}.png`;
-        link.click();
-      });
+    let link = document.createElement("a");
+    link.href = dataURL;
+    link.target = "_blank";
+    link.download = `${this.memberNo}_${this.division}_${this.memberName}.png`;
+    link.click();
   }
 }
 </script>
