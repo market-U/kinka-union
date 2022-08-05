@@ -1,10 +1,18 @@
 <template>
   <div>
     <v-file-input v-model="file" accept="image/*" label="組合員の写真を選択してください" @change="onChangeFileInput" />
-    <!-- <input type="file" name="image" accept="image/*" style="font-size: 1.2em; padding: 10px 0" @change="setImage" /> -->
     <v-btn @click="rotate" v-if="file != []">Rotate</v-btn>
-    <v-btn @click="cropImage" v-if="file != []">crop</v-btn>
-    <div class="preview" style="border-radius: 16px">aaa</div>
+    <!-- <v-btn @click="cropImage" v-if="file != []">crop</v-btn> -->
+    <v-btn @click="download" v-if="file != []"><v-icon>mdi-download</v-icon>download</v-btn>
+    <div class="cardPreview" ref="cardPreview">
+      <v-img src="../assets/cardBG.png" />
+      <div class="photoPreview">組合員のお顔</div>
+      <div class="infoPreview pa-10">
+        <v-card-title class="memberNo ma-2">組合員番号 {{ memberNo }}</v-card-title>
+        <v-card-title class="division ma-2">{{ division }}支部</v-card-title>
+        <div class="memberName">{{ memberName }}</div>
+      </div>
+    </div>
     <vue-cropper
       ref="cropper"
       :guides="true"
@@ -18,23 +26,63 @@
       alt="Source Image"
       :img-style="imgStyle"
       :aspect-ratio="3 / 4"
-      preview=".preview"
+      preview=".photoPreview"
       @cropend="cropImage"
     />
     <v-img :src="cropedImg" alt="Cropped Image" />
   </div>
 </template>
 <style scoped>
-.preview {
-  width: 200px;
-  height: 500px;
+.cardPreview {
+  position: relative;
+  zoom: 0.25;
+  width: 1920px;
+}
+.photoPreview {
+  width: 474px;
+  height: 632px;
   overflow: hidden;
-  background-color: yellow;
+  position: absolute;
+  top: 390px;
+  left: 200px;
+  border-radius: 24px;
+  background-color: rgba(255, 183, 0, 0.369);
+}
+.infoPreview {
+  width: 976px;
+  height: 632px;
+  overflow: hidden;
+  position: absolute;
+  top: 390px;
+  left: 746px;
+  border-radius: 24px;
+  text-align: center;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+}
+.memberNo {
+  font-size: 60px;
+  line-height: 80px;
+}
+.division {
+  font-size: 60px;
+  line-height: 80px;
+}
+.memberName {
+  text-align: center;
+  flex-grow: 1;
+  font-size: 84px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 </style>
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
 import VueCropper from "vue-cropperjs";
+import html2canvas from "html2canvas";
 import "cropperjs/dist/cropper.css";
 
 @Component({
@@ -50,10 +98,19 @@ export default class KinkaUnionCard extends Vue {
   private imgSrc?: string | ArrayBuffer | null = "";
   private cropedImg?: string | ArrayBuffer | null = "";
   private file: File[] = [];
+  private memberNo = "2222";
+  private division = "フォーン";
+  private memberName = "ハツキ";
 
   private onChangeFileInput() {
+    console.log(this.file);
     const cropper: VueCropper = this.$refs.cropper as VueCropper;
-    cropper.replace(URL.createObjectURL(this.file));
+    if (this.file === null) {
+      this.file = [];
+      cropper.replace(null);
+    } else {
+      cropper.replace(URL.createObjectURL(this.file));
+    }
   }
 
   private setImage(e: Event) {
@@ -85,6 +142,28 @@ export default class KinkaUnionCard extends Vue {
     // guess what this does :)
     const cropper = this.$refs.cropper as VueCropper;
     cropper.rotate(90);
+  }
+
+  private async download() {
+    const preview: HTMLElement = this.$refs.cardPreview as HTMLElement;
+    const params: Parameters<typeof html2canvas> = [
+      preview,
+      {
+        // オプションを指定、一旦飛ばします
+      },
+    ];
+    const canvasElement = await html2canvas(...params).catch((e) => {
+      console.error(e);
+      return;
+    });
+    if (!canvasElement) {
+      return;
+    }
+    const dataURL = canvasElement.toDataURL("image/png");
+    let link = document.createElement("a");
+    link.href = dataURL;
+    link.download = "canvas-" + new Date().getTime() + ".png";
+    link.click();
   }
 }
 </script>
