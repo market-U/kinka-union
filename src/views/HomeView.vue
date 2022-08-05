@@ -1,16 +1,19 @@
 <template>
-  <hello-world />
+  <div>
+    <kinka-union-card />
+  </div>
 </template>
 
 <script lang="ts">
-import Vue from "vue";
 import HelloWorld from "../components/HelloWorld.vue";
+import KinkaUnionCard from "../components/KinkaUnionCard.vue";
+import { Component, Prop, Vue } from "vue-property-decorator";
 
-export default Vue.extend({
-  name: "Home",
-
+@Component({
   components: {
     HelloWorld,
+    KinkaUnionCard,
   },
-});
+})
+export default class HomeView extends Vue {}
 </script>
