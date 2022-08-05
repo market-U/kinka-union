@@ -78,7 +78,7 @@
         </v-col>
       </v-row>
     </v-card>
-    <v-img v-show="false" :src="cropedImg" alt="Cropped Image" />
+    <v-img src="../assets/004.png" />
   </div>
 </template>
 <style scoped>
@@ -153,7 +153,7 @@ import "cropperjs/dist/cropper.css";
   },
 })
 export default class KinkaUnionCard extends Vue {
-  private imgSrc = ref();
+  private imgSrc = require("@/assets/004.png");
   private cropedImg?: string | ArrayBuffer | null = "";
   private file = null;
   private memberNo = "";
@@ -162,7 +162,7 @@ export default class KinkaUnionCard extends Vue {
   private divisionType = "支部";
 
   mounted() {
-    this.imgSrc = require("@/assets/004.png");
+    // this.imgSrc = require("@/assets/004.png");
   }
 
   get filled(): boolean {
