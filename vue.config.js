@@ -3,5 +3,5 @@ module.exports = defineConfig({
   transpileDependencies: ["vuetify"],
   outputDir: "docs",
   assetsDir: './',
-  publicPath: './',
+  publicPath: '/kinka-union',
 });

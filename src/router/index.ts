@@ -6,7 +6,7 @@ Vue.use(VueRouter);
 
 const routes: Array<RouteConfig> = [
   {
-    path: "/kinka-union",
+    path: "/",
     name: "home",
     component: HomeView,
   },
