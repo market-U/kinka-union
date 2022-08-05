@@ -1,18 +1,8 @@
 <template>
   <div>
     <v-file-input v-model="file" accept="image/*" label="組合員の写真を選択してください" @change="onChangeFileInput" />
-    <v-btn @click="rotate" v-if="file != []">Rotate</v-btn>
+    <v-btn @click="rotate" v-if="file != []"><v-icon>mdi-file-rotate-right</v-icon>ROTATE</v-btn>
     <!-- <v-btn @click="cropImage" v-if="file != []">crop</v-btn> -->
-    <v-btn @click="download" v-if="file != []"><v-icon>mdi-download</v-icon>download</v-btn>
-    <div class="cardPreview" ref="cardPreview">
-      <v-img src="../assets/cardBG.png" />
-      <div class="photoPreview">組合員のお顔</div>
-      <div class="infoPreview pa-10">
-        <v-card-title class="memberNo ma-2">組合員番号 {{ memberNo }}</v-card-title>
-        <v-card-title class="division ma-2">{{ division }}支部</v-card-title>
-        <div class="memberName">{{ memberName }}</div>
-      </div>
-    </div>
     <vue-cropper
       ref="cropper"
       :guides="true"
@@ -29,7 +19,29 @@
       preview=".photoPreview"
       @cropend="cropImage"
     />
-    <v-img :src="cropedImg" alt="Cropped Image" />
+    <v-card class="ma-3 pa-3">
+      <v-card-title>プレビュー</v-card-title>
+      <v-row>
+        <v-col>
+          <div class="cardPreview" ref="cardPreview">
+            <v-img src="../assets/cardBG.png" />
+            <div class="photoPreview"></div>
+            <div class="infoPreview pa-10">
+              <v-card-title class="memberNo ma-2">組合員No. {{ memberNo }}</v-card-title>
+              <v-card-title class="division ma-2">{{ division }}支部</v-card-title>
+              <div class="memberName">{{ memberName }}</div>
+            </div>
+          </div>
+        </v-col>
+        <v-col>
+          <v-text-field label="組合員No." v-model="memberNo" />
+          <v-text-field label="支部名" v-model="division" />
+          <v-text-field label="おなまえ" v-model="memberName" />
+          <v-btn @click="download" v-if="file != []"><v-icon>mdi-download</v-icon>download</v-btn>
+        </v-col>
+      </v-row>
+    </v-card>
+    <v-img v-show="false" :src="cropedImg" alt="Cropped Image" />
   </div>
 </template>
 <style scoped>
@@ -60,6 +72,8 @@
   background-color: white;
   display: flex;
   flex-direction: column;
+  font-family: "Murecho";
+  color: rgb(74, 45, 19);
 }
 .memberNo {
   font-size: 60px;
@@ -70,6 +84,7 @@
   line-height: 80px;
 }
 .memberName {
+  font-weight: bold;
   text-align: center;
   flex-grow: 1;
   font-size: 84px;
@@ -99,7 +114,7 @@ export default class KinkaUnionCard extends Vue {
   private cropedImg?: string | ArrayBuffer | null = "";
   private file: File[] = [];
   private memberNo = "2222";
-  private division = "フォーン";
+  private division = "ﾌｫｰﾝ";
   private memberName = "ハツキ";
 
   private onChangeFileInput() {
@@ -162,7 +177,7 @@ export default class KinkaUnionCard extends Vue {
     const dataURL = canvasElement.toDataURL("image/png");
     let link = document.createElement("a");
     link.href = dataURL;
-    link.download = "canvas-" + new Date().getTime() + ".png";
+    link.download = `${this.memberNo}_${this.division}_${this.memberName}.png`;
     link.click();
   }
 }
