@@ -166,7 +166,7 @@ export default class KinkaUnionCard extends Vue {
 
   private async download() {
     const preview: HTMLElement = this.$refs.cardPreview as HTMLElement;
-    const params: Parameters<typeof html2canvas> = [preview, {}];
+    const params: Parameters<typeof html2canvas> = [preview];
     const canvasElement = await html2canvas(...params).catch((e) => {
       console.error(e);
       return;
@@ -174,7 +174,7 @@ export default class KinkaUnionCard extends Vue {
     if (!canvasElement) {
       return;
     }
-    const dataURL = canvasElement.toDataURL("image/png");
+    const dataURL = canvasElement.toDataURL("image/octet-stream");
     let link = document.createElement("a");
     link.href = dataURL;
     link.download = `${this.memberNo}_${this.division}_${this.memberName}.png`;

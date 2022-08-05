@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <v-app-bar app color="primary" dark>
-      <v-card-title>キンカ組合へようこそ</v-card-title>
+      <v-card-title class="title">キンカ組合へようこそ</v-card-title>
       <v-spacer></v-spacer>
       <v-btn href="https://twitter.com/okigirl25" target="_blank" text>
         <span class="mr-2" v-show="!mobile">contact</span>
@@ -14,6 +14,13 @@
     </v-main>
   </v-app>
 </template>
+
+<style scoped>
+.title {
+  font-family: "Murecho";
+  font-weight: bold;
+}
+</style>
 
 <script lang="ts">
 import { Vue, Component } from "vue-property-decorator";
