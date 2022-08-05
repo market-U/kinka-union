@@ -174,11 +174,16 @@ export default class KinkaUnionCard extends Vue {
     if (!canvasElement) {
       return;
     }
-    const dataURL = canvasElement.toDataURL("image/octet-stream");
-    let link = document.createElement("a");
-    link.href = dataURL;
-    link.download = `${this.memberNo}_${this.division}_${this.memberName}.png`;
-    link.click();
+    const dataURL = canvasElement.toDataURL("image/png");
+    fetch(dataURL)
+      .then((res) => res.blob())
+      .then((blob) => {
+        const blob_url = URL.createObjectURL(blob);
+        let link = document.createElement("a");
+        link.href = dataURL;
+        link.download = `${this.memberNo}_${this.division}_${this.memberName}.png`;
+        link.click();
+      });
   }
 }
 </script>
