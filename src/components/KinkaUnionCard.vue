@@ -16,6 +16,7 @@
             :background="true"
             :rotatable="true"
             alt="No Image..."
+            :src="imgSrc"
             :aspect-ratio="3 / 4"
             preview=".photoPreview"
             @cropend="cropImage"
@@ -134,13 +135,14 @@
 }
 .cropper {
   max-width: 400px;
-  min-height: 300px;
+  min-height: 200px;
   background-color: rgb(255, 207, 87);
   text-align: center;
 }
 </style>
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
+import { ref } from "vue";
 import VueCropper from "vue-cropperjs";
 import html2canvas from "html2canvas";
 import "cropperjs/dist/cropper.css";
@@ -151,13 +153,17 @@ import "cropperjs/dist/cropper.css";
   },
 })
 export default class KinkaUnionCard extends Vue {
-  private imgSrc?: string | ArrayBuffer | null = "";
+  private imgSrc = ref();
   private cropedImg?: string | ArrayBuffer | null = "";
   private file = null;
   private memberNo = "";
   private division = "";
   private memberName = "";
   private divisionType = "支部";
+
+  mounted() {
+    this.imgSrc = require("@/assets/004.png");
+  }
 
   get filled(): boolean {
     return this.file != null && this.memberNo !== "" && this.memberName !== "" && this.division !== "";
@@ -183,26 +189,6 @@ export default class KinkaUnionCard extends Vue {
     }
   }
 
-  private setImage(e: Event) {
-    const target = e.target as HTMLInputElement;
-    const file = (target.files as FileList)[0];
-    if (!file.type.includes("image/")) {
-      alert("Please select an image file");
-      return;
-    }
-    if (typeof FileReader === "function") {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        this.imgSrc = event.target?.result;
-        // rebuild cropperjs with the updated source
-        const cropper = this.$refs.cropper as VueCropper;
-        cropper.replace(event?.target?.result);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      alert("Sorry, FileReader API not supported");
-    }
-  }
   private cropImage() {
     // get image data for post processing, e.g. upload or setting image src
     const cropper = this.$refs.cropper as VueCropper;
