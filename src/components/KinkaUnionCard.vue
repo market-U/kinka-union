@@ -57,7 +57,7 @@
       <v-card-title>プレビュー</v-card-title>
       <v-row>
         <v-col align="center">
-          <div class="cardFrame" :class="trimClass" :style="`zoom: ${zoom}`">
+          <div class="cardFrame" :class="trimClass" ref="cardFrame" :style="`zoom: ${zoom}`">
             <div class="cardPreview" ref="cardPreview">
               <v-img src="../assets/cardBG.png" @load="cardBGLoaded()" />
               <div class="photoPreview"></div>
@@ -68,7 +68,7 @@
               </div>
             </div>
           </div>
-          <v-row>
+          <v-row v-if="forStaff">
             <v-spacer />
             <v-checkbox v-model="trim" label="塗り足しを隠す" row style="display: inline"></v-checkbox>
             <v-spacer />
@@ -78,9 +78,23 @@
           <v-text-field label="組合員No." v-model="memberNo" />
           <v-text-field label="支部名" v-model="division" />
           <v-text-field label="おなまえ" v-model="memberName" />
+          <v-text-field
+            v-if="forStaff"
+            label="ダウンロードファイル名"
+            hint="指定しない場合は {組合員No.}_{支部名}_{おなまえ}.png となります。"
+            v-model="downloadFileName"
+          />
           <v-card-actions>
             <v-spacer />
-            <v-btn @click="download" :disabled="!file" color="primary"><v-icon>mdi-download</v-icon>download</v-btn>
+            <v-btn @click="createCardImage(false)" :disabled="!file" color="primary" v-if="forStaff"
+              ><v-icon class="mr-2">mdi-smart-card-outline</v-icon>原稿表示</v-btn
+            >
+            <v-btn @click="createCardImage(false)" :disabled="!file" color="primary" v-else
+              ><v-icon class="mr-2">mdi-smart-card-outline</v-icon>発行！</v-btn
+            >
+            <v-btn @click="createCardImage(true)" :disabled="!file" color="primary" v-if="forStaff"
+              ><v-icon>mdi-download</v-icon>原稿ダウンロード</v-btn
+            >
           </v-card-actions>
         </v-col>
       </v-row>
@@ -181,6 +195,15 @@ export default class KinkaUnionCard extends Vue {
   private memberName = "";
   private divisionType = "支部";
   private trim = false;
+  private forStaff = false;
+  private downloadFileName = "";
+
+  created() {
+    const staff = this.$route.query.staff;
+    if (staff != null) {
+      this.forStaff = true;
+    }
+  }
 
   mounted() {
     this.imgSrc = require("@/assets/004.png");
@@ -239,8 +262,10 @@ export default class KinkaUnionCard extends Vue {
     const cropper = this.$refs.cropper as VueCropper;
     cropper.reset();
   }
-  private async download() {
-    const preview: HTMLElement = this.$refs.cardPreview as HTMLElement;
+  private async createCardImage(download: boolean) {
+    const preview: HTMLElement = this.forStaff
+      ? (this.$refs.cardPreview as HTMLElement)
+      : (this.$refs.cardFrame as HTMLElement);
     const params: Parameters<typeof html2canvas> = [preview, { scale: 1 }];
     const canvasElement = await html2canvas(...params).catch((e) => {
       console.error(e);
@@ -253,7 +278,13 @@ export default class KinkaUnionCard extends Vue {
     let link = document.createElement("a");
     link.href = dataURL;
     link.target = "_blank";
-    link.download = `${this.memberNo}_${this.division}_${this.memberName}.png`;
+    if (download) {
+      if (this.downloadFileName !== "") {
+        link.download = `${this.downloadFileName}.png`;
+      } else {
+        link.download = `${this.memberNo}_${this.division}_${this.memberName}.png`;
+      }
+    }
     link.click();
   }
 
