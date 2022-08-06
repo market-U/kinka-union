@@ -101,7 +101,12 @@
     </v-card>
     <v-dialog :fullscreen="mobile" v-model="dialog">
       <v-card style="background-color: white">
-        <v-card-title><v-spacer />組合員証を発行しました！<v-spacer /></v-card-title>
+        <v-card-title>
+          <v-spacer />
+          <span v-if="forStaff">組合員証の原稿を発行しました！</span>
+          <span v-else>組合員証を発行しました！</span>
+          <v-spacer />
+        </v-card-title>
         <v-card-text align="center">長押しやマウスの右クリックで、画像を保存してください。</v-card-text>
         <v-card-text align="center">
           <img :src="dataURL" style="max-width: min(90%, 720px)" />
