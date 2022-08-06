@@ -99,6 +99,20 @@
         </v-col>
       </v-row>
     </v-card>
+    <v-dialog :fullscreen="mobile" v-model="dialog">
+      <v-card style="background-color: white">
+        <v-card-title><v-spacer />組合員証を発行しました！<v-spacer /></v-card-title>
+        <v-card-text align="center">長押しやマウスの右クリックで、画像を保存してください。</v-card-text>
+        <v-card-text align="center">
+          <img :src="dataURL" style="max-width: min(90%, 720px)" />
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn @click="closeDialog" color="primary"><v-icon>mdi-close</v-icon>とじる</v-btn>
+          <v-spacer />
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <v-img v-show="false" src="../assets/004.png" />
   </div>
 </template>
@@ -197,6 +211,8 @@ export default class KinkaUnionCard extends Vue {
   private trim = false;
   private forStaff = false;
   private downloadFileName = "";
+  private dataURL = "";
+  private dialog = false;
 
   created() {
     const staff = this.$route.query.staff;
@@ -275,17 +291,25 @@ export default class KinkaUnionCard extends Vue {
       return;
     }
     const dataURL = canvasElement.toDataURL("image/png");
-    let link = document.createElement("a");
-    link.href = dataURL;
-    link.target = "_blank";
     if (download) {
+      let link = document.createElement("a");
+      link.href = dataURL;
+      link.target = "_blank";
       if (this.downloadFileName !== "") {
         link.download = `${this.downloadFileName}.png`;
       } else {
         link.download = `${this.memberNo}_${this.division}_${this.memberName}.png`;
       }
+      link.click();
+    } else {
+      this.dataURL = dataURL;
+      this.dialog = true;
     }
-    link.click();
+  }
+
+  private closeDialog() {
+    this.dialog = false;
+    this.dataURL = "";
   }
 
   private cardBGLoaded() {
