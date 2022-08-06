@@ -57,15 +57,22 @@
       <v-card-title>プレビュー</v-card-title>
       <v-row>
         <v-col align="center">
-          <div class="cardPreview" ref="cardPreview" :style="`zoom: ${zoom}`">
-            <v-img src="../assets/cardBG.png" />
-            <div class="photoPreview"></div>
-            <div class="infoPreview pa-10">
-              <v-card-title class="memberNo ma-2">組合員No. {{ memberNo }}</v-card-title>
-              <v-card-title class="division ma-2">{{ division }}{{ divisionType }}</v-card-title>
-              <div class="memberName">{{ memberName }}</div>
+          <div class="cardFrame" :class="trimClass" :style="`zoom: ${zoom}`">
+            <div class="cardPreview" ref="cardPreview">
+              <v-img src="../assets/cardBG.png" @load="cardBGLoaded()" />
+              <div class="photoPreview"></div>
+              <div class="infoPreview pa-10">
+                <v-card-title class="memberNo ma-2">組合員No. {{ memberNo }}</v-card-title>
+                <v-card-title class="division ma-2">{{ division }}{{ divisionType }}</v-card-title>
+                <div class="memberName">{{ memberName }}</div>
+              </div>
             </div>
           </div>
+          <v-row>
+            <v-spacer />
+            <v-checkbox v-model="trim" label="塗り足しを隠す" row style="display: inline"></v-checkbox>
+            <v-spacer />
+          </v-row>
         </v-col>
         <v-col>
           <v-text-field label="組合員No." v-model="memberNo" />
@@ -73,7 +80,7 @@
           <v-text-field label="おなまえ" v-model="memberName" />
           <v-card-actions>
             <v-spacer />
-            <v-btn @click="download" :disabled="!file"><v-icon>mdi-download</v-icon>download</v-btn>
+            <v-btn @click="download" :disabled="!file" color="primary"><v-icon>mdi-download</v-icon>download</v-btn>
           </v-card-actions>
         </v-col>
       </v-row>
@@ -82,9 +89,23 @@
   </div>
 </template>
 <style scoped>
-.cardPreview {
+.overflowHidden {
+  overflow: hidden;
+}
+.cardFrame {
   position: relative;
+  width: 1720px;
+  height: 1080px;
+  border-radius: 40px;
+  box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.4);
+  margin-bottom: 100px;
+  margin-top: 100px;
+}
+.cardPreview {
+  position: absolute;
   width: 1920px;
+  top: -100px;
+  left: -100px;
 }
 .photoPreview {
   width: 474px;
@@ -94,7 +115,7 @@
   top: 385px;
   left: 200px;
   border-radius: 24px;
-  background-color: rgba(255, 183, 0, 0.5);
+  background-color: white;
 }
 .infoPreview {
   width: 976px;
@@ -106,7 +127,6 @@
   border-radius: 24px;
   text-align: center;
   background-color: rgb(255, 255, 255);
-  /* border: dashed 1px silver; */
   display: flex;
   flex-direction: column;
   font-family: "Murecho";
@@ -160,9 +180,14 @@ export default class KinkaUnionCard extends Vue {
   private division = "";
   private memberName = "";
   private divisionType = "支部";
+  private trim = false;
 
   mounted() {
     this.imgSrc = require("@/assets/004.png");
+  }
+
+  get trimClass(): string {
+    return this.trim ? "overflowHidden" : "";
   }
 
   get filled(): boolean {
@@ -230,6 +255,12 @@ export default class KinkaUnionCard extends Vue {
     link.target = "_blank";
     link.download = `${this.memberNo}_${this.division}_${this.memberName}.png`;
     link.click();
+  }
+
+  private cardBGLoaded() {
+    this.$nextTick(() => {
+      this.trim = true;
+    });
   }
 }
 </script>

@@ -3,10 +3,10 @@
     <v-app-bar app color="primary" dark>
       <v-card-title class="welcome">キンカ組合へようこそ</v-card-title>
       <v-spacer></v-spacer>
-      <v-btn href="https://twitter.com/okigirl25" target="_blank" text>
-        <span class="mr-2" v-show="!mobile">contact</span>
+      <!-- <v-btn href="https://twitter.com/okigirl25" target="_blank" text>
+        <span class="mr-2" v-show="!mobile"></span>
         <v-icon>mdi-twitter</v-icon>
-      </v-btn>
+      </v-btn> -->
     </v-app-bar>
 
     <v-main>
