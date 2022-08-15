@@ -1,0 +1,44 @@
+{
+  "lang": "日本語",
+  "common": {
+    "welcome_msg": "{msg}へようこそ",
+    "close": "とじる",
+    "download_copy": "原稿ダウンロード",
+    "issue": "発行！",
+    "show_copy": "原稿表示",
+    "dl_file_name": "ダウンロードファイル名"
+  },
+  "labels": {
+    "photo_section_title": "お写真登録",
+    "card_preview": "プレビュー",
+    "division_name": "支部名",
+    "member_name": "おなまえ",
+    "member_no": "{msg}No.",
+    "hide_bleed": "塗り足しを隠す"
+  },
+  "messages": {
+    "select_photo": "{member}のお写真を選択してください"
+  },
+  "caption": {
+    "division": "{msg}支部"
+  },
+  "organization": {
+    "union": {
+      "name": "{msg}組合",
+      "member": "組合員"
+    },
+    "rengo": {
+      "name": "{msg}連合",
+      "member": "加入者"
+    },
+    "fan_club": {
+      "name": "{msg}ファンクラブ",
+      "member": "会員"
+    }
+  },
+  "bird": {
+    "kinka": "キンカ",
+    "buncho": "文鳥",
+    "hatchan": "はっちゃん"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "lang": "English",
+  "common": {
+    "welcome_msg": "Welcome to {msg}",
+    "close": "Close",
+    "download_copy": "Download the Copy",
+    "issue": "Issue!",
+    "show_copy": "Show the Copy",
+    "dl_file_name": "Download File Name"
+  },
+  "labels": {
+    "photo_section_title": "Photo Settings",
+    "card_preview": "Card Preview",
+    "division_name": "Branch",
+    "member_name": "Member Name",
+    "member_no": "{msg} No.",
+    "hide_bleed": "Hide the bleed"
+  },
+  "messages": {
+    "select_photo": "Select {member}'s photo."
+  },
+  "caption": {
+    "division": "{msg} Branch"
+  },
+  "organization": {
+    "union": {
+      "name": "{msg} Union",
+      "member": "Member"
+    },
+    "rengo": {
+      "name": "{msg} Union",
+      "member": "Member"
+    },
+    "fan_club": {
+      "name": "{msg} Fan Club",
+      "member": "Member"
+    }
+  },
+  "bird": {
+    "kinka": "Kinka",
+    "buncho": "Buncho",
+    "hatchan": "Hatchan"
+  }
+}

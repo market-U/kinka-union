@@ -1,14 +1,18 @@
 import Vue from "vue";
 import VueRouter, { RouteConfig } from "vue-router";
-import HomeView from "../views/HomeView.vue";
+import CardMakerView from "../views/CardMakerView.vue";
 
 Vue.use(VueRouter);
 
 const routes: Array<RouteConfig> = [
   {
     path: "/",
+    redirect: "/kinka",
+  },
+  {
+    path: "/:type",
     name: "home",
-    component: HomeView,
+    component: CardMakerView,
   },
   // {
   //   path: "/about",
