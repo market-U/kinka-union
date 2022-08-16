@@ -6,7 +6,8 @@
     "download_copy": "Download the Copy",
     "issue": "Issue!",
     "show_copy": "Show the Copy",
-    "dl_file_name": "Download File Name"
+    "dl_file_name": "Download File Name",
+    "logo_spacing": "0em"
   },
   "labels": {
     "photo_section_title": "Photo Settings",
@@ -25,15 +26,21 @@
   "organization": {
     "union": {
       "name": "{msg} Union",
-      "member": "Member"
+      "member": "Member",
+      "membership_no": "Membership No.",
+      "card_title": "UNION CARD"
     },
     "rengo": {
       "name": "{msg} Union",
-      "member": "Member"
+      "member": "Member",
+      "membership_no": "Membership No.",
+      "card_title": "UNION CARD"
     },
     "fan_club": {
       "name": "{msg} Fan Club",
-      "member": "Member"
+      "member": "Member",
+      "membership_no": "Membership No.",
+      "card_title": "MEMBERSHIP CARD"
     }
   },
   "bird": {

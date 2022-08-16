@@ -6,7 +6,8 @@
     "download_copy": "原稿ダウンロード",
     "issue": "発行！",
     "show_copy": "原稿表示",
-    "dl_file_name": "ダウンロードファイル名"
+    "dl_file_name": "ダウンロードファイル名",
+    "logo_spacing": "0.11em"
   },
   "labels": {
     "photo_section_title": "お写真登録",
@@ -25,15 +26,21 @@
   "organization": {
     "union": {
       "name": "{msg}組合",
-      "member": "組合員"
+      "member": "組合員",
+      "membership_no": "組合員No.",
+      "card_title": "組合員証"
     },
     "rengo": {
       "name": "{msg}連合",
-      "member": "加入者"
+      "member": "加入者",
+      "membership_no": "加入者No.",
+      "card_title": "連合加入者証"
     },
     "fan_club": {
       "name": "{msg}ファンクラブ",
-      "member": "会員"
+      "member": "会員",
+      "membership_no": "会員番号",
+      "card_title": "会員証"
     }
   },
   "bird": {

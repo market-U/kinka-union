@@ -16,5 +16,6 @@ export default new Vuetify({
         success: "#3f51b5",
       },
     },
+    options: { customProperties: true },
   },
 });

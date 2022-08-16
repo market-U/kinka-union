@@ -5,6 +5,7 @@ export const kinka: CardType = {
   assets: {
     card_bg: "cardBG.png",
     default_photo: "dot_kinka.png",
+    logo: "logo_kinka.png",
   },
   colors: {
     card_info_font: "#4a2d13",
@@ -22,7 +23,8 @@ export const buncho: CardType = {
   bird_type: "buncho",
   assets: {
     card_bg: "cardBG_bun.png",
-    default_photo: "dot_kinka.png",
+    default_photo: "dot_bun.png",
+    logo: "logo_bun.png",
   },
   colors: {
     card_info_font: "#666",
@@ -31,6 +33,6 @@ export const buncho: CardType = {
   theme: {
     primary: "#F3614F",
     secondary: "#ff9999",
-    accent: "#666",
+    accent: "#282828",
   },
 } as const;

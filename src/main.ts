@@ -10,6 +10,7 @@ Vue.use(VueI18n);
 const locale = window.navigator.language.slice(0, 2);
 export const i18n = new VueI18n({
   locale,
+  fallbackLocale: "en",
   messages: {
     ja: require("./assets/messages/ja.json"),
     en: require("./assets/messages/en.json"),

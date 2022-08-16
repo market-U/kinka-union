@@ -61,6 +61,15 @@
           <div class="cardFrame" :class="trimClass" ref="cardFrame" :style="`zoom: ${zoom}`">
             <div class="cardPreview" ref="cardPreview">
               <v-img :src="require(`../assets/${cardType.assets.card_bg}`)" @load="cardBGLoaded()" />
+              <div class="cardTitle">{{ $t(`organization.${cardType.organization_type}.card_title`) }}</div>
+              <div class="organizationName" :style="logoStyleString">
+                <v-img :src="require(`@/assets/${cardType.assets.logo}`)" width="84px" class="mr-2" />
+                {{
+                  $t(`organization.${cardType.organization_type}.name`, {
+                    msg: $t(`bird.${cardType.bird_type}`).toString(),
+                  })
+                }}
+              </div>
               <div class="photoPreview"></div>
               <div class="infoPreview pa-10" :style="`color: ${cardType.colors.card_info_font};`">
                 <v-card-title class="memberNo ma-2">{{ numberLabel }} {{ memberNo }}</v-card-title>
@@ -100,6 +109,8 @@
         </v-col>
       </v-row>
     </v-card>
+
+    <!-- issue dialog -->
     <v-dialog :fullscreen="mobile" v-model="dialog">
       <v-card style="background-color: white">
         <v-card-title>
@@ -125,6 +136,10 @@
   </div>
 </template>
 <style scoped>
+@font-face {
+  font-family: "Yasashisa Bold";
+  src: url("@/assets/fonts/yasashisa.ttf") format("truetype");
+}
 .overflowHidden {
   overflow: hidden;
 }
@@ -142,6 +157,28 @@
   width: 1920px;
   top: -100px;
   left: -100px;
+}
+.cardTitle {
+  position: absolute;
+  color: white;
+  top: 134px;
+  left: 177px;
+  font-size: 91px;
+  letter-spacing: 0.14em;
+  font-family: "Murecho";
+  font-weight: 500;
+  -webkit-text-size-adjust: auto;
+}
+.organizationName {
+  display: flex;
+  position: absolute;
+  color: var(--v-accent-base);
+  top: 156px;
+  right: 156px;
+  font-size: 59px;
+  /* letter-spacing: 0.11em; */
+  font-family: "Yasashisa Bold";
+  -webkit-text-size-adjust: auto;
 }
 .photoPreview {
   width: 474px;
@@ -253,10 +290,11 @@ export default class CardMaker extends Vue {
   }
 
   get numberLabel(): string {
-    // this.$t(`organization.${this.cardType?.organization_type}.member`);
-    return this.$t("labels.member_no", {
-      msg: this.$t(`organization.${this.cardType?.organization_type}.member`),
-    }).toString();
+    return this.$t(`organization.${this.cardType?.organization_type}.membership_no`).toString();
+  }
+
+  get logoStyleString(): string {
+    return `letter-spacing: ${this.$t("common.logo_spacing")};`;
   }
 
   get zoom(): number {

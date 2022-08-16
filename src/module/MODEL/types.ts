@@ -4,6 +4,7 @@ export interface CardType {
   assets: {
     default_photo: string;
     card_bg: string;
+    logo: string;
   };
   colors: {
     card_info_font: string;
