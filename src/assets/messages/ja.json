@@ -18,7 +18,10 @@
     "hide_bleed": "塗り足しを隠す"
   },
   "messages": {
-    "select_photo": "{member}のお写真を選択してください"
+    "select_photo": "{member}のお写真を選択してください",
+    "card_issued": "{card}を発行しました！",
+    "card_copy_issued": "{card}の原稿を発行しました！",
+    "save_image": "長押しやマウスの右クリックで、画像を保存してください。"
   },
   "caption": {
     "division": "{msg}支部"

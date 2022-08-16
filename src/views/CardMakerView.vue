@@ -6,7 +6,7 @@
 
 <script lang="ts">
 import CardMaker from "../components/CardMaker.vue";
-import { Component, Prop, Vue } from "vue-property-decorator";
+import { Component, Vue, Watch } from "vue-property-decorator";
 import { MODEL } from "@/module";
 
 @Component({
@@ -21,18 +21,28 @@ export default class CardMakerView extends Vue {
     this.$vuetify.theme.themes.light.secondary = this.type.theme.secondary;
     this.$vuetify.theme.themes.light.accent = this.type.theme.accent;
   }
+
   created() {
-    const path = this.$route.path;
+    this.setCardType(this.$route.path);
+  }
+
+  private setCardType(path: string) {
     if (path === "/kinka") {
       this.type = MODEL.kinka;
     } else if (path === "/buncho") {
       this.type = MODEL.buncho;
     } else if (path === "/hatchan") {
-      console.log("はっちゃん！");
+      this.type = MODEL.kinka;
+    } else {
+      this.type = MODEL.kinka;
     }
-    // this.$store.commit("setTitle", this.getWelcomeMessage(this.type.bird_type));
     this.$store.commit("setCardType", this.type);
     this.setTheme();
+  }
+
+  @Watch("$route.path")
+  onChangePath(path: string) {
+    this.setCardType(path);
   }
 }
 </script>

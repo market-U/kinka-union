@@ -1,6 +1,7 @@
 <template>
   <v-app>
     <v-app-bar app color="primary" dark>
+      <v-app-bar-nav-icon v-on:click.stop="drawer = !drawer"></v-app-bar-nav-icon>
       <v-card-title class="welcome">{{ welcomeMessage }}</v-card-title>
       <v-spacer></v-spacer>
       <!-- <v-btn href="https://twitter.com/okigirl25" target="_blank" text>
@@ -27,7 +28,20 @@
         </v-list>
       </v-menu>
     </v-app-bar>
-
+    <v-navigation-drawer v-model="drawer" temporary fixed>
+      <v-list>
+        <v-list-item-group color="primary">
+          <v-list-item v-for="item in menuItems" :key="`${item.bird_type}`" :to="`/${item.bird_type}`">
+            <v-list-item-icon
+              ><v-img :src="require(`@/assets/${item.assets.default_photo}`)" width="40px"
+            /></v-list-item-icon>
+            <v-list-item-title>{{
+              $t(`organization.${item.organization_type}.name`, { msg: $t(`bird.${item.bird_type}`).toString() })
+            }}</v-list-item-title>
+          </v-list-item>
+        </v-list-item-group>
+      </v-list>
+    </v-navigation-drawer>
     <v-main>
       <router-view />
     </v-main>
@@ -43,10 +57,14 @@
 
 <script lang="ts">
 import { Vue, Component } from "vue-property-decorator";
+import { MODEL } from "./module";
+import { CardType } from "./module/MODEL";
 
 @Component
 export default class App extends Vue {
   private selectedLocaleIndex = 0;
+  private drawer = false;
+  private menuItems: CardType[] = [MODEL.kinka, MODEL.buncho];
   get mobile(): boolean {
     return this.$vuetify.breakpoint.mobile;
   }

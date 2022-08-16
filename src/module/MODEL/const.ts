@@ -10,6 +10,7 @@ export const kinka: CardType = {
   colors: {
     card_info_font: "#4a2d13",
     default_photo_bg: "#ffc107",
+    title_font: "#fff",
   },
   theme: {
     primary: "#ff9800",
@@ -29,6 +30,7 @@ export const buncho: CardType = {
   colors: {
     card_info_font: "#666",
     default_photo_bg: "#ff9999",
+    title_font: "#fff",
   },
   theme: {
     primary: "#F3614F",

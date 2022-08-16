@@ -18,7 +18,10 @@
     "hide_bleed": "Hide the bleed"
   },
   "messages": {
-    "select_photo": "Select {member}'s photo."
+    "select_photo": "Select {member}'s photo.",
+    "card_issued": "Your {card} has been issued.",
+    "card_copy_issued": "The copy of {card} has been created.",
+    "save_image": "Save the image by pressing and holding the screen or right-clicking the mouse."
   },
   "caption": {
     "division": "{msg} Branch"

@@ -58,15 +58,22 @@
       <v-card-title>{{ $t("labels.card_preview") }}</v-card-title>
       <v-row>
         <v-col align="center">
-          <div class="cardFrame" :class="trimClass" ref="cardFrame" :style="`zoom: ${zoom}`">
+          <div
+            class="cardFrame"
+            :class="trimClass"
+            ref="cardFrame"
+            :style="`zoom: ${zoom}; ${canvas ? 'position:absolute; left: -1920px;' : ''}`"
+          >
             <div class="cardPreview" ref="cardPreview">
               <v-img :src="require(`../assets/${cardType.assets.card_bg}`)" @load="cardBGLoaded()" />
-              <div class="cardTitle">{{ $t(`organization.${cardType.organization_type}.card_title`) }}</div>
+              <div class="cardTitle" :style="titleStyleString">
+                {{ $t(`organization.${cardType.organization_type}.card_title`) }}
+              </div>
               <div class="organizationName" :style="logoStyleString">
                 <v-img :src="require(`@/assets/${cardType.assets.logo}`)" width="84px" class="mr-2" />
                 {{
-                  $t(`organization.${cardType.organization_type}.name`, {
-                    msg: $t(`bird.${cardType.bird_type}`).toString(),
+                  $t(`organization.${cardType.organization_type}.name`, "ja", {
+                    msg: $t(`bird.${cardType.bird_type}`, "ja").toString(),
                   })
                 }}
               </div>
@@ -110,20 +117,34 @@
       </v-row>
     </v-card>
 
+    <v-overlay v-model="canvas">
+      <v-progress-circular color="primary" indeterminate />
+    </v-overlay>
+
     <!-- issue dialog -->
     <v-dialog :fullscreen="mobile" v-model="dialog">
       <v-card style="background-color: white">
         <v-card-title>
           <v-spacer />
-          <span v-if="forStaff">組合員証の原稿を発行しました！</span>
-          <span v-else>組合員証を発行しました！</span>
+          <span v-if="forStaff">{{
+            $t("messages.card_copy_issued", {
+              card: $t(`organization.${cardType.organization_type}.card_title`).toString().toLowerCase(),
+            })
+          }}</span>
+          <span v-else>
+            {{
+              $t("messages.card_issued", {
+                card: $t(`organization.${cardType.organization_type}.card_title`).toString().toLowerCase(),
+              })
+            }}
+          </span>
           <v-spacer />
         </v-card-title>
-        <v-card-text align="center">長押しやマウスの右クリックで、画像を保存してください。</v-card-text>
+        <v-card-text align="center">{{ $t("messages.save_image") }}</v-card-text>
         <v-card-text align="center">
           <img :src="dataURL" style="max-width: min(90%, 720px)" />
         </v-card-text>
-        <v-card-text align="center">
+        <v-card-text align="center" v-if="false">
           <img :src="cropedImg" style="max-width: min(90%, 720px)" />
         </v-card-text>
         <v-card-actions>
@@ -160,7 +181,6 @@
 }
 .cardTitle {
   position: absolute;
-  color: white;
   top: 134px;
   left: 177px;
   font-size: 91px;
@@ -256,6 +276,7 @@ export default class CardMaker extends Vue {
   private downloadFileName = "";
   private dataURL = "";
   private dialog = false;
+  private canvas = false;
 
   created() {
     const staff = this.$route.query.staff;
@@ -270,7 +291,7 @@ export default class CardMaker extends Vue {
 
   @Watch("cardType")
   onChangeCardType() {
-    console.log("on change cardtype");
+    this.imgSrc = require(`@/assets/${this.cardType?.assets.default_photo}`);
   }
 
   private get cropper() {
@@ -294,14 +315,22 @@ export default class CardMaker extends Vue {
   }
 
   get logoStyleString(): string {
-    return `letter-spacing: ${this.$t("common.logo_spacing")};`;
+    return `letter-spacing: ${this.$t("common.logo_spacing", "ja")};`;
+  }
+
+  get titleStyleString(): string {
+    return `color: ${this.cardType?.colors.title_font};`;
   }
 
   get zoom(): number {
-    const dispWidth = this.$vuetify.breakpoint.width; // - this.$vuetify.breakpoint.scrollBarWidth;
-    const root = this.$refs.root as HTMLElement;
-    const [marginTortalm, previewOriginalWidth, maxZoom] = [48, 1920, 0.25];
-    return Math.min((dispWidth - marginTortalm) / previewOriginalWidth, maxZoom);
+    if (this.canvas) {
+      return 1;
+    } else {
+      const dispWidth = this.$vuetify.breakpoint.width; // - this.$vuetify.breakpoint.scrollBarWidth;
+      const root = this.$refs.root as HTMLElement;
+      const [marginTortalm, previewOriginalWidth, maxZoom] = [48, 1920, 0.25];
+      return Math.min((dispWidth - marginTortalm) / previewOriginalWidth, maxZoom);
+    }
   }
   private onChangeFileInput() {
     if (this.file == null) {
@@ -332,32 +361,36 @@ export default class CardMaker extends Vue {
     this.cropper.reset();
   }
   private async createCardImage(download: boolean) {
-    const preview: HTMLElement = this.forStaff
-      ? (this.$refs.cardPreview as HTMLElement)
-      : (this.$refs.cardFrame as HTMLElement);
-    const params: Parameters<typeof html2canvas> = [preview, { scale: 1 }];
-    const canvasElement = await html2canvas(...params).catch((e) => {
-      console.error(e);
-      return;
-    });
-    if (!canvasElement) {
-      return;
-    }
-    const dataURL = canvasElement.toDataURL("image/png");
-    if (download) {
-      let link = document.createElement("a");
-      link.href = dataURL;
-      link.target = "_blank";
-      if (this.downloadFileName !== "") {
-        link.download = `${this.downloadFileName}.png`;
-      } else {
-        link.download = `${this.memberNo}_${this.division}_${this.memberName}.png`;
+    this.canvas = true;
+    Vue.nextTick(async () => {
+      const preview: HTMLElement = this.forStaff
+        ? (this.$refs.cardPreview as HTMLElement)
+        : (this.$refs.cardFrame as HTMLElement);
+      const params: Parameters<typeof html2canvas> = [preview, { scale: 1 }];
+      const canvasElement = await html2canvas(...params).catch((e) => {
+        console.error(e);
+        return;
+      });
+      if (!canvasElement) {
+        return;
       }
-      link.click();
-    } else {
-      this.dataURL = dataURL;
-      this.dialog = true;
-    }
+      const dataURL = canvasElement.toDataURL("image/png");
+      this.canvas = false;
+      if (download) {
+        let link = document.createElement("a");
+        link.href = dataURL;
+        link.target = "_blank";
+        if (this.downloadFileName !== "") {
+          link.download = `${this.downloadFileName}.png`;
+        } else {
+          link.download = `${this.memberNo}_${this.division}_${this.memberName}.png`;
+        }
+        link.click();
+      } else {
+        this.dataURL = dataURL;
+        this.dialog = true;
+      }
+    });
   }
 
   private closeDialog() {
