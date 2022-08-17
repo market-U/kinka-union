@@ -49,15 +49,15 @@ export const hatchan: CardType = {
   },
   colors: {
     card_info_font: "#6c4228",
-    default_photo_bg: "#ff9999",
+    default_photo_bg: "#72c4ba",
     title_font: "#6c4228",
   },
   layout: {
     title_pr: "160px",
   },
   theme: {
-    primary: "#F3614F",
-    secondary: "#ff9999",
+    primary: "#72c4ba",
+    secondary: "#ff7272",
     accent: "#282828",
   },
 } as const;
