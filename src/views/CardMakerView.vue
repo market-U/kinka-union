@@ -32,7 +32,7 @@ export default class CardMakerView extends Vue {
     } else if (path === "/buncho") {
       this.type = MODEL.buncho;
     } else if (path === "/hatchan") {
-      this.type = MODEL.kinka;
+      this.type = MODEL.hatchan;
     } else {
       this.type = MODEL.kinka;
     }

@@ -2,7 +2,9 @@
   <v-app>
     <v-app-bar app color="primary" dark>
       <v-app-bar-nav-icon v-on:click.stop="drawer = !drawer"></v-app-bar-nav-icon>
-      <v-card-title class="welcome">{{ welcomeMessage }}</v-card-title>
+      <v-card-title class="welcome text-truncate">
+        <div>{{ welcomeMessage }}</div>
+      </v-card-title>
       <v-spacer></v-spacer>
       <!-- <v-btn href="https://twitter.com/okigirl25" target="_blank" text>
         <span class="mr-2" v-show="!mobile"></span>
@@ -10,7 +12,7 @@
       </v-btn> -->
       <v-menu offset-y>
         <template v-slot:activator="{ on, attrs }">
-          <v-btn v-on="on" v-bind="attrs" text>
+          <v-btn v-on="on" v-bind="attrs" icon>
             <v-icon>mdi-translate</v-icon>
           </v-btn>
         </template>
@@ -64,7 +66,7 @@ import { CardType } from "./module/MODEL";
 export default class App extends Vue {
   private selectedLocaleIndex = 0;
   private drawer = false;
-  private menuItems: CardType[] = [MODEL.kinka, MODEL.buncho];
+  private menuItems: CardType[] = [MODEL.kinka, MODEL.buncho, MODEL.hatchan];
   get mobile(): boolean {
     return this.$vuetify.breakpoint.mobile;
   }

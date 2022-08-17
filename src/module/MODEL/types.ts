@@ -4,13 +4,16 @@ export interface CardType {
   assets: {
     default_photo: string;
     card_bg: string;
-    logo: string;
-    frame?: string;
+    logo?: string;
+    overlay?: string;
   };
   colors: {
     card_info_font: string;
     default_photo_bg: string;
     title_font: string;
+  };
+  layout?: {
+    title_pr?: string;
   };
   theme: {
     primary: string;

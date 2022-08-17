@@ -28,7 +28,11 @@
             class="ma-3"
             v-model="file"
             accept="image/*"
-            :label="$t('messages.select_photo', { member: $t(`organization.${cardType.organization_type}.member`) })"
+            :label="
+              $t('messages.select_photo', {
+                member: $t(`organization.${cardType.organization_type}.member`).toString().toLowerCase(),
+              })
+            "
             @change="onChangeFileInput"
             :clearable="false"
           />
@@ -69,7 +73,7 @@
               <div class="cardTitle" :style="titleStyleString">
                 {{ $t(`organization.${cardType.organization_type}.card_title`) }}
               </div>
-              <div class="organizationName" :style="logoStyleString">
+              <div class="organizationName" :style="logoStyleString" v-if="cardType.assets.logo">
                 <v-img :src="require(`@/assets/${cardType.assets.logo}`)" width="84px" class="mr-2" />
                 {{
                   $t(`organization.${cardType.organization_type}.name`, "ja", {
@@ -81,8 +85,9 @@
               <div class="infoPreview pa-10" :style="`color: ${cardType.colors.card_info_font};`">
                 <v-card-title class="memberNo ma-2">{{ numberLabel }} {{ memberNo }}</v-card-title>
                 <v-card-title class="division ma-2">{{ $t("caption.division", { msg: division }) }}</v-card-title>
-                <div class="memberName">{{ memberName }}</div>
+                <div class="memberName" :style="memberNameStyle">{{ memberName }}</div>
               </div>
+              <v-img class="cardOverlay" :src="cardOverlay ? require(`../assets/${cardOverlay}`) : ''" />
             </div>
           </div>
           <v-row v-if="forStaff">
@@ -134,7 +139,7 @@
           <span v-else>
             {{
               $t("messages.card_issued", {
-                card: $t(`organization.${cardType.organization_type}.card_title`).toString().toLowerCase(),
+                card: $t(`organization.${cardType.organization_type}.card`).toString().toLowerCase(),
               })
             }}
           </span>
@@ -178,6 +183,12 @@
   width: 1920px;
   top: -100px;
   left: -100px;
+}
+.cardOverlay {
+  position: absolute;
+  width: 1920px;
+  top: 0px;
+  left: 0px;
 }
 .cardTitle {
   position: absolute;
@@ -320,6 +331,14 @@ export default class CardMaker extends Vue {
 
   get titleStyleString(): string {
     return `color: ${this.cardType?.colors.title_font};`;
+  }
+
+  get memberNameStyle(): string {
+    return this.cardType?.layout?.title_pr ? `padding-right: ${this.cardType?.layout?.title_pr}` : "";
+  }
+
+  get cardOverlay(): string | undefined {
+    return this.cardType?.assets.overlay;
   }
 
   get zoom(): number {

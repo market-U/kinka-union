@@ -3,14 +3,14 @@
   "common": {
     "welcome_msg": "Welcome to {msg}",
     "close": "Close",
-    "download_copy": "Download the Copy",
+    "download_copy": "Download Copy",
     "issue": "Issue!",
-    "show_copy": "Show the Copy",
+    "show_copy": "Show Copy",
     "dl_file_name": "Download File Name",
     "logo_spacing": "0em"
   },
   "labels": {
-    "photo_section_title": "Photo Settings",
+    "photo_section_title": "Face Photo Registration",
     "card_preview": "Card Preview",
     "division_name": "Branch",
     "member_name": "Member Name",
@@ -31,19 +31,22 @@
       "name": "{msg} Union",
       "member": "Member",
       "membership_no": "Membership No.",
+      "card": "Union card",
       "card_title": "UNION CARD"
     },
     "rengo": {
       "name": "{msg} Union",
       "member": "Member",
       "membership_no": "Membership No.",
+      "card": "Union card",
       "card_title": "UNION CARD"
     },
-    "fan_club": {
+    "hatchan_fan_club": {
       "name": "{msg} Fan Club",
       "member": "Member",
       "membership_no": "Membership No.",
-      "card_title": "MEMBERSHIP CARD"
+      "card": "Membership card",
+      "card_title": "HATCHAN FAN CLUB"
     }
   },
   "bird": {
