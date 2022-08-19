@@ -30,10 +30,10 @@
         </v-list>
       </v-menu>
     </v-app-bar>
-    <v-navigation-drawer v-model="drawer" temporary fixed>
+    <v-navigation-drawer v-model="drawer" temporary fixed width="280px">
       <v-list>
         <v-list-item-group color="primary">
-          <v-list-item v-for="item in menuItems" :key="`${item.bird_type}`" :to="`/${item.bird_type}`">
+          <v-list-item v-for="item in menuItems" :key="`${item.bird_type}`" :to="`/card/${item.bird_type}`">
             <v-list-item-icon
               ><v-img :src="require(`@/assets/${item.assets.default_photo}`)" width="40px"
             /></v-list-item-icon>
@@ -43,6 +43,15 @@
           </v-list-item>
         </v-list-item-group>
       </v-list>
+      <template v-slot:append>
+        <v-list-item href="https://twitter.com/okigirl25" target="_blank">
+          <v-list-item-title>
+            <v-icon color="light-blue" class="mr-1">mdi-twitter</v-icon>
+            created by でこがーるさん
+            <v-icon class="ml-1" dense>mdi-open-in-new</v-icon>
+          </v-list-item-title>
+        </v-list-item>
+      </template>
     </v-navigation-drawer>
     <v-main>
       <router-view />

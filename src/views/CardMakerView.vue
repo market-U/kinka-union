@@ -27,11 +27,11 @@ export default class CardMakerView extends Vue {
   }
 
   private setCardType(path: string) {
-    if (path === "/kinka") {
+    if (path === "/card/kinka") {
       this.type = MODEL.kinka;
-    } else if (path === "/buncho") {
+    } else if (path === "/card/buncho") {
       this.type = MODEL.buncho;
-    } else if (path === "/hatchan") {
+    } else if (path === "/card/hatchan") {
       this.type = MODEL.hatchan;
     } else {
       this.type = MODEL.kinka;

@@ -7,10 +7,10 @@ Vue.use(VueRouter);
 const routes: Array<RouteConfig> = [
   {
     path: "/",
-    redirect: "/kinka",
+    redirect: "/card/kinka",
   },
   {
-    path: "/:type",
+    path: "/card/:type",
     name: "home",
     component: CardMakerView,
   },
