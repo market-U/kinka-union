@@ -7,9 +7,9 @@
               });
               console.log("q.p", q.p);
               console.log("l.pathname", l.pathname);
-              console.log("replaceState to  /" + l.pathname.slice(0, -1) + (q.p || ''));
+              console.log("replaceState to  " + l.pathname + (q.p || ''));
               if (q.p !== undefined) {
-                  window.history.replaceState(null, null, l.pathname.slice(0, -1) + (q.p || '')); // https://hoge.com/fooへ遷移
+                  window.history.replaceState(null, null, l.pathname + (q.p || '')); // https://hoge.com/fooへ遷移
               }
           }
       }(window.location))</script><script defer="defer" src="/kinka-union/js/chunk-vendors.8cbb8b0f.js"></script><script defer="defer" src="/kinka-union/js/app.7eb97437.js"></script><link href="/kinka-union/css/chunk-vendors.07d09a83.css" rel="stylesheet"><link href="/kinka-union/css/app.f5864389.css" rel="stylesheet"></head><body><noscript><strong>We're sorry but kinka-union doesn't work properly without JavaScript enabled. Please enable it to continue.</strong></noscript><div id="app"></div></body></html>
