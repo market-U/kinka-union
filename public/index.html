@@ -14,15 +14,12 @@
       (function (l) {
           if (l.search) {
               var q = {};
-              l.search.slice(1).split('&').forEach(function (v) { // ?p=/fooの分解
-                  var a = v.split('='); // 'p=/foo' となっているはずなので=で分割
-                  q[a[0]] = a[1]; // {p: '/foo'} 形式に修正
+              l.search.slice(1).split('&').forEach(function (v) {
+                  var a = v.split('=');
+                  q[a[0]] = a[1];
               });
-              console.log("q.p", q.p);
-              console.log("l.pathname", l.pathname);
-              console.log("replaceState to  " + l.pathname + (q.p || ''));
               if (q.p !== undefined) {
-                  window.history.replaceState(null, null, l.pathname + (q.p || '')); // https://hoge.com/fooへ遷移
+                  window.history.replaceState(null, null, l.pathname + (q.p || ''));
               }
           }
       }(window.location))
