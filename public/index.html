@@ -20,8 +20,9 @@
               });
               console.log("q.p", q.p);
               console.log("l.pathname", l.pathname);
+              console.log("replaceState to  /" + l.pathname.slice(0, -1) + (q.p || ''));
               if (q.p !== undefined) {
-                  window.history.replaceState(null, null, "/" + l.pathname.slice(0, -1) + (q.p || '')); // https://hoge.com/fooへ遷移
+                  window.history.replaceState(null, null, l.pathname.slice(0, -1) + (q.p || '')); // https://hoge.com/fooへ遷移
               }
           }
       }(window.location))
