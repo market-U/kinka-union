@@ -1,6 +1,7 @@
 import Vue from "vue";
 import VueRouter, { RouteConfig } from "vue-router";
 import CardMakerView from "../views/CardMakerView.vue";
+import UniMakerView from "../views/UniMakerView.vue";
 
 Vue.use(VueRouter);
 
@@ -13,6 +14,11 @@ const routes: Array<RouteConfig> = [
     path: "/card/:type",
     name: "home",
     component: CardMakerView,
+  },
+  {
+    path: "/uni/:type",
+    name: "uni",
+    component: UniMakerView,
   },
 ];
 
