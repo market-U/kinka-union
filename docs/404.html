@@ -7,7 +7,7 @@
       let port = l.port ? ':' + l.port : ''
       l.replace(
           // `${l.protocol}//${l.hostname}${port}/kinka-union?p=${l.pathname.split('/').slice(0, 1 + segmentCount).join('/')}`
-          `${l.protocol}//${l.hostname}${port}/kinka-union?p=${l.pathname.split('/').slice(1).join('/')}`
+          `${l.protocol}//${l.hostname}${port}/kinka-union?p=${l.pathname.split('/').slice(2).join('/')}`
       )
     </script>
   </head>
