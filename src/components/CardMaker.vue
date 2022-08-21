@@ -152,6 +152,12 @@
         <v-card-text align="center" v-if="false">
           <img :src="cropedImg" style="max-width: min(90%, 720px)" />
         </v-card-text>
+        <v-card-text align="center">
+          {{ $t("messages.share_image") }}
+          <v-btn :href="tweetShareURL" target="_blank" icon
+            ><v-icon color="light-blue">mdi-twitter</v-icon></v-btn
+          ></v-card-text
+        >
         <v-card-actions>
           <v-spacer />
           <v-btn @click="closeDialog" color="primary"><v-icon>mdi-close</v-icon>{{ $t("common.close") }}</v-btn>
@@ -421,6 +427,38 @@ export default class CardMaker extends Vue {
     this.$nextTick(() => {
       this.trim = true;
     });
+  }
+
+  get organizationName(): string {
+    return this.$t(`organization.${this.cardType?.organization_type}.name`, {
+      msg: this.$t(`bird.${this.cardType?.bird_type}`).toString(),
+    }).toString();
+  }
+
+  get orgNameHashTag(): string {
+    return `#${this.organizationName.replace(/ /g, "")}`;
+  }
+
+  get appNameHashTag(): string {
+    return `#${"KinkaUnionCardMaker"}`;
+  }
+
+  get shareText(): string {
+    return encodeURIComponent(`${this.$t("common.welcome_msg", { msg: this.organizationName })}!!
+
+${this.numberLabel} ${this.memberNo}
+${this.$t("caption.division", { msg: this.division })}
+${this.memberName}
+
+${this.orgNameHashTag}
+${this.appNameHashTag}
+`);
+  }
+
+  get tweetShareURL(): string {
+    let url = `${location.protocol}//${location.host}${location.pathname}`;
+    const shareURL = `https://twitter.com/intent/tweet?text=${this.shareText}&url=${url}`;
+    return shareURL;
   }
 }
 </script>

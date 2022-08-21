@@ -21,7 +21,8 @@
     "select_photo": "Select {member}'s photo.",
     "card_issued": "Your {card} has been issued.",
     "card_copy_issued": "The copy of {card} has been created.",
-    "save_image": "Save the image by pressing and holding the screen or right-clicking the mouse."
+    "save_image": "Save the image by pressing and holding the screen or right-clicking the mouse.",
+    "share_image": "Attach your saved image and tweet it!"
   },
   "caption": {
     "division": "{msg} Branch"
