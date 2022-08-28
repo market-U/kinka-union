@@ -16,6 +16,7 @@
             :min-container-height="180"
             :background="true"
             :rotatable="true"
+            :aspect-ratio="1 / 1"
             alt="No Image..."
             :src="imgSrc"
             preview=".photoPreview"
@@ -61,12 +62,19 @@
       <v-card-title>{{ $t("labels.card_preview") }}</v-card-title>
       <v-row>
         <v-col>
-          <div class="uniFrame">
-            <v-img :src="cropedImg" class="uniPhoto" />
-            <canvas class="uniCanvas" ref="uniCanvas"></canvas>
+          <div class="uniFrame" ref="uniFrame">
+            <v-img :src="cropedImg" class="uniPhoto" :width="uniProp.canvas.width" :height="uniProp.canvas.height" />
+            <canvas
+              class="uniCanvas"
+              ref="uniCanvas"
+              :width="uniProp.canvas.width"
+              :height="uniProp.canvas.height"
+            ></canvas>
           </div>
+          <v-switch v-model="play" label="うごかす"></v-switch>
+          <v-switch v-model="imageOverlay" label="うみのなか"></v-switch>
         </v-col>
-        <v-col align="center">
+        <v-col align="center" v-show="false">
           <div
             class="cardFrame"
             :class="trimClass"
@@ -102,6 +110,25 @@
           </v-row>
         </v-col>
         <v-col>
+          {{ uniProp }}
+          <v-slider v-model="uniProp.canvas.width" label="canvas幅" min="200" max="1000"></v-slider>
+          <v-slider v-model="uniProp.canvas.height" label="canvas高さ" min="200" max="1000"></v-slider>
+          <v-slider v-model="uniProp.center.x" label="中心X" min="0" :max="uniProp.canvas.width"></v-slider>
+          <v-slider v-model="uniProp.lineWidth" label="線の太さ" min="10" max="180"></v-slider>
+          <v-slider v-model="uniProp.lineNum" label="線の数" min="30" max="500"></v-slider>
+          <v-slider v-model="uniProp.circleRadius.min" label="中心半径" min="10" max="300"></v-slider>
+          <v-slider v-model="uniProp.circleRadius.amplitude" label="ぎざぎざ度合い" min="0" max="100"></v-slider>
+          <v-color-picker
+            v-model="uniProp.lineColor"
+            dot-size="25"
+            swatches-max-height="200"
+            mode="hexa"
+          ></v-color-picker>
+          <v-btn @click="createCardImage(false)" :disabled="!file" color="primary">
+            <v-icon class="mr-2">mdi-smart-card-outline</v-icon>{{ $t("common.issue") }}
+          </v-btn>
+        </v-col>
+        <v-col v-show="false">
           <v-text-field :label="numberLabel" v-model="memberNo" />
           <v-text-field :label="$t('labels.division_name')" v-model="division" />
           <v-text-field :label="$t('labels.member_name')" v-model="memberName" />
@@ -179,7 +206,7 @@
 }
 .uniCanvas {
   position: absolute;
-  background-color: brown;
+  /* background-color: blanchedalmond; */
 }
 .overflowHidden {
   overflow: hidden;
@@ -303,6 +330,27 @@ export default class CardMaker extends Vue {
   private dataURL = "";
   private dialog = false;
   private canvas = false;
+  private play = false;
+  private playFrameMS = 150;
+  private imageOverlay = false;
+  private issueImageScale = 1;
+  private uniProp = {
+    canvas: {
+      width: 600,
+      height: 600,
+    },
+    lineNum: 200,
+    lineWidth: 200,
+    center: {
+      x: 300,
+      y: 300,
+    },
+    circleRadius: {
+      amplitude: 25,
+      min: 35,
+    },
+    lineColor: { hex: "#000" },
+  };
 
   created() {
     const staff = this.$route.query.staff;
@@ -318,6 +366,40 @@ export default class CardMaker extends Vue {
   @Watch("cardType")
   onChangeCardType() {
     this.imgSrc = require(`@/assets/${this.cardType?.assets.default_photo}`);
+  }
+
+  @Watch("uniProp", { deep: true })
+  onChangeUniProp() {
+    if (this.cropedImg != "") {
+      this.play = false;
+      this.drawFocusLine();
+    }
+  }
+
+  @Watch("play")
+  onChangePlay(play: boolean) {
+    if (play) {
+      this.drawFocusLine();
+    }
+  }
+
+  @Watch("imageOverlay")
+  onChangeImageOverlay() {
+    this.drawFocusLine();
+  }
+
+  private drawFocusLine() {
+    const canvas = this.$refs.uniCanvas as HTMLCanvasElement;
+    this.focusLine(
+      canvas,
+      this.uniProp.center.x,
+      this.uniProp.center.y,
+      this.uniProp.lineWidth,
+      this.uniProp.lineNum,
+      this.uniProp.circleRadius.min + this.uniProp.circleRadius.amplitude,
+      this.uniProp.circleRadius.min,
+      this.uniProp.lineColor.hex
+    );
   }
 
   private get cropper() {
@@ -377,9 +459,6 @@ export default class CardMaker extends Vue {
   private cropImage() {
     // get image data for post processing, e.g. upload or setting image src
     this.cropedImg = this.cropper.getCroppedCanvas().toDataURL();
-
-    const canvas = this.$refs.uniCanvas as HTMLCanvasElement;
-    this.focusLine(canvas, 100, 100, 3, 50, 100, 50, "#000");
   }
   private rotate(deg: number) {
     // guess what this does :)
@@ -400,15 +479,22 @@ export default class CardMaker extends Vue {
   private async createCardImage(download: boolean) {
     this.canvas = true;
     Vue.nextTick(async () => {
-      const preview: HTMLElement = this.forStaff
-        ? (this.$refs.cardPreview as HTMLElement)
-        : (this.$refs.cardFrame as HTMLElement);
-      const params: Parameters<typeof html2canvas> = [preview, { scale: 1 }];
+      const preview: HTMLElement = this.$refs.uniFrame as HTMLElement;
+      const params: Parameters<typeof html2canvas> = [
+        preview,
+        {
+          scale: this.issueImageScale,
+          width: this.uniProp.canvas.width,
+          height: this.uniProp.canvas.height,
+        },
+      ];
       const canvasElement = await html2canvas(...params).catch((e) => {
         console.error(e);
+        this.canvas = false;
         return;
       });
       if (!canvasElement) {
+        this.canvas = false;
         return;
       }
       const dataURL = canvasElement.toDataURL("image/png");
@@ -452,22 +538,104 @@ export default class CardMaker extends Vue {
     lineColor: string
   ) {
     const ctx = canvas.getContext("2d");
-    let lines = [];
+    let lines: Liner[] = [];
     const csRadius = Math.sqrt(Math.pow(canvas.width / 2, 2) + Math.pow(canvas.height / 2, 2));
-    console.log("csRadius", csRadius, canvas.width, canvas.height);
 
-    const getRandomInt = (max: number, min: number): number => {
-      return Math.floor(Math.random() * (max - min) + min);
+    class Liner {
+      private deg = 0;
+      private moveDeg = 0;
+      private endRadius = 0;
+      private startPos: Pos = { x: 0, y: 0 };
+      private endPos: Pos = { x: 0, y: 0 };
+      private movePos: Pos = { x: 0, y: 0 };
+
+      constructor() {
+        this.initialize();
+      }
+
+      private initialize() {
+        this.deg = this.getRandomInt(360, 0);
+      }
+
+      private getRandomInt = (max: number, min: number): number => {
+        return Math.floor(Math.random() * (max - min)) + min;
+      };
+
+      getCircumPos = {
+        x: (deg: number, rad: number, cx: number): number => {
+          return Math.cos((Math.PI / 180) * deg) * rad + cx;
+        },
+        y: (deg: number, rad: number, cy: number): number => {
+          return Math.sin((Math.PI / 180) * deg) * rad + cy;
+        },
+      };
+
+      setPos() {
+        this.moveDeg = this.deg + this.getRandomInt(lineWidth, 1) / 10;
+        this.endRadius = this.getRandomInt(circleRadiusMax, circleRadiusMin);
+        this.startPos = {
+          x: this.getCircumPos.x(this.deg, csRadius, centralX),
+          y: this.getCircumPos.y(this.deg, csRadius, centralY),
+        };
+        this.movePos = {
+          x: this.getCircumPos.x(this.moveDeg, csRadius, centralX),
+          y: this.getCircumPos.y(this.moveDeg, csRadius, centralY),
+        };
+        this.endPos = {
+          x: this.getCircumPos.x(this.moveDeg, this.endRadius, centralX),
+          y: this.getCircumPos.y(this.moveDeg, this.endRadius, centralY),
+        };
+      }
+
+      update() {
+        this.setPos();
+      }
+
+      draw() {
+        if (ctx) {
+          ctx.beginPath();
+          ctx.lineWidth = 1;
+          ctx.fillStyle = lineColor;
+          ctx.moveTo(this.startPos.x, this.startPos.y);
+          ctx.lineTo(this.movePos.x, this.movePos.y);
+          ctx.lineTo(this.endPos.x, this.endPos.y);
+          ctx.fill();
+          ctx.closePath();
+        }
+      }
+
+      render() {
+        this.update();
+        this.draw();
+      }
+    }
+    const createLines = (num: number) => {
+      lines = [];
+      [...Array(num)].map(() => lines.push(new Liner()));
+    };
+    const render = () => {
+      if (ctx) ctx.globalCompositeOperation = "source-over";
+      ctx?.clearRect(0, 0, canvas.width, canvas.height);
+      lines.forEach((l) => l.render());
+      if (this.imageOverlay) {
+        const img = new Image();
+        img.src = require(`../assets/cardBG.png`);
+        img.onload = function () {
+          console.log("Image onload");
+          // ctx?.save();
+          if (ctx) ctx.globalCompositeOperation = "source-in";
+          ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+        };
+      }
+      if (this.play) setTimeout(() => render(), this.playFrameMS);
     };
 
-    const getCircumPos = {
-      x: (deg: number, rad: number, cx: number): number => {
-        return Math.cos((Math.PI / 180) * deg) * rad;
-      },
-      y: (deg: number, rad: number, cy: number): number => {
-        return Math.cos((Math.PI / 180) * deg) * rad;
-      },
-    };
+    createLines(lineNum);
+    render();
   }
+}
+interface Pos {
+  x: number;
+  y: number;
 }
 </script>
