@@ -62,7 +62,7 @@
       <v-card-title>{{ $t("labels.card_preview") }}</v-card-title>
       <v-row>
         <v-col>
-          <div class="uniFrame" ref="uniFrame">
+          <div class="uniFrame" ref="uniFrame" @click="uniClick">
             <v-img :src="cropedImg" class="uniPhoto" :width="uniProp.canvas.width" :height="uniProp.canvas.height" />
             <canvas
               class="uniCanvas"
@@ -110,10 +110,11 @@
           </v-row>
         </v-col>
         <v-col>
-          {{ uniProp }}
+          <!-- {{ uniProp }} -->
           <v-slider v-model="uniProp.canvas.width" label="canvas幅" min="200" max="1000"></v-slider>
           <v-slider v-model="uniProp.canvas.height" label="canvas高さ" min="200" max="1000"></v-slider>
-          <v-slider v-model="uniProp.center.x" label="中心X" min="0" :max="uniProp.canvas.width"></v-slider>
+          <!-- <v-slider v-model="uniProp.center.x" label="中心X" min="0" :max="uniProp.canvas.width"></v-slider>
+          <v-slider v-model="uniProp.center.y" label="中心Y" min="0" :max="uniProp.canvas.height"></v-slider> -->
           <v-slider v-model="uniProp.lineWidth" label="線の太さ" min="10" max="180"></v-slider>
           <v-slider v-model="uniProp.lineNum" label="線の数" min="30" max="500"></v-slider>
           <v-slider v-model="uniProp.circleRadius.min" label="中心半径" min="10" max="300"></v-slider>
@@ -339,7 +340,7 @@ export default class CardMaker extends Vue {
       width: 600,
       height: 600,
     },
-    lineNum: 200,
+    lineNum: 250,
     lineWidth: 200,
     center: {
       x: 300,
@@ -349,7 +350,7 @@ export default class CardMaker extends Vue {
       amplitude: 25,
       min: 35,
     },
-    lineColor: { hex: "#000" },
+    lineColor: { hex: "#000000" },
   };
 
   created() {
@@ -361,6 +362,7 @@ export default class CardMaker extends Vue {
 
   mounted() {
     this.imgSrc = require(`@/assets/${this.cardType?.assets.default_photo}`);
+    this.uniProp.lineColor.hex = "#000000";
   }
 
   @Watch("cardType")
@@ -386,6 +388,11 @@ export default class CardMaker extends Vue {
   @Watch("imageOverlay")
   onChangeImageOverlay() {
     this.drawFocusLine();
+  }
+
+  private uniClick(event: PointerEvent) {
+    // console.log(event.offsetX, event.offsetY);
+    this.uniProp.center = { x: event.offsetX, y: event.offsetY };
   }
 
   private drawFocusLine() {
@@ -539,7 +546,11 @@ export default class CardMaker extends Vue {
   ) {
     const ctx = canvas.getContext("2d");
     let lines: Liner[] = [];
-    const csRadius = Math.sqrt(Math.pow(canvas.width / 2, 2) + Math.pow(canvas.height / 2, 2));
+
+    const csRadius = Math.sqrt(
+      Math.pow(Math.max(canvas.width - centralX, centralX), 2) +
+        Math.pow(Math.max(canvas.height - centralY, centralY), 2)
+    );
 
     class Liner {
       private deg = 0;
