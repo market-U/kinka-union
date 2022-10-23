@@ -27,6 +27,9 @@ export default class UniMakerView extends Vue {
   }
 
   private setCardType(path: string) {
+    if (path === "/uni") {
+      this.type = MODEL.uni;
+    }
     this.$store.commit("setCardType", this.type);
     this.setTheme();
   }

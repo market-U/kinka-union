@@ -20,6 +20,10 @@ const routes: Array<RouteConfig> = [
     name: "uni",
     component: UniMakerView,
   },
+  {
+    path: "/card/uni",
+    redirect: "/uni",
+  },
 ];
 
 const router = new VueRouter({

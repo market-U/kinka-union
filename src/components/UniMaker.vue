@@ -1,161 +1,209 @@
 <template>
   <div>
-    <v-card class="ma-3 pa-3">
-      <v-card-title>{{ $t("labels.photo_section_title") }}</v-card-title>
-      <v-row>
-        <v-col align="center" cols="12" md="6">
-          <vue-cropper
-            ref="cropper"
-            class="ma-3 cropper"
-            :style="`background-color: ${cardType.colors.default_photo_bg};`"
-            :guides="true"
-            :view-mode="2"
-            drag-mode="crop"
-            :auto-crop-area="0.5"
-            :min-container-width="250"
-            :min-container-height="180"
-            :background="true"
-            :rotatable="true"
-            :aspect-ratio="1 / 1"
-            alt="No Image..."
-            :src="imgSrc"
-            preview=".photoPreview"
-            @cropend="cropImage"
-          />
-        </v-col>
-        <v-col class="pa-3" cols="12" md="6">
-          <v-file-input
-            class="ma-3"
-            v-model="file"
-            accept="image/*"
-            :label="
-              $t('messages.select_photo', {
-                member: $t(`organization.${cardType.organization_type}.member`).toString().toLowerCase(),
-              })
-            "
-            @change="onChangeFileInput"
-            :clearable="false"
-          />
-          <div class="toolButtons" style="text-align: center">
-            <v-btn @click="rotate(-90)" :disabled="!file" icon color="primary"
-              ><v-icon>mdi-file-rotate-left</v-icon></v-btn
-            >
-            <v-btn @click="rotate(90)" :disabled="!file" icon color="primary"
-              ><v-icon>mdi-file-rotate-right</v-icon></v-btn
-            >
-            <v-btn @click="move(-10, 0)" :disabled="!file" icon color="primary"><v-icon>mdi-arrow-left</v-icon></v-btn>
-            <v-btn @click="move(10, 0)" :disabled="!file" icon color="primary"><v-icon>mdi-arrow-right</v-icon></v-btn>
-            <v-btn @click="move(0, -10)" :disabled="!file" icon color="primary"><v-icon>mdi-arrow-up</v-icon></v-btn>
-            <v-btn @click="move(0, 10)" :disabled="!file" icon color="primary"><v-icon>mdi-arrow-down</v-icon></v-btn>
-            <v-btn @click="relativeZoom(0.1)" :disabled="!file" icon color="primary"
-              ><v-icon>mdi-magnify-plus</v-icon></v-btn
-            >
-            <v-btn @click="relativeZoom(-0.1)" :disabled="!file" icon color="primary"
-              ><v-icon>mdi-magnify-minus</v-icon></v-btn
-            >
-            <v-btn @click="reset()" :disabled="!file" icon color="primary"><v-icon>mdi-undo-variant</v-icon></v-btn>
-          </div>
-        </v-col>
-      </v-row>
-    </v-card>
-    <v-card class="ma-3 pa-3">
-      <v-card-title>{{ $t("labels.card_preview") }}</v-card-title>
-      <v-row>
-        <v-col>
-          <div class="uniFrame" ref="uniFrame" @click="uniClick">
-            <v-img :src="cropedImg" class="uniPhoto" :width="uniProp.canvas.width" :height="uniProp.canvas.height" />
-            <canvas
-              class="uniCanvas"
-              ref="uniCanvas"
-              :width="uniProp.canvas.width"
-              :height="uniProp.canvas.height"
-            ></canvas>
-          </div>
-          <v-switch v-model="play" label="うごかす"></v-switch>
-          <v-switch v-model="imageOverlay" label="うみのなか"></v-switch>
-        </v-col>
-        <v-col align="center" v-show="false">
-          <div
-            class="cardFrame"
-            :class="trimClass"
-            ref="cardFrame"
-            :style="`zoom: ${zoom}; ${canvas ? 'position:absolute; left: -1920px;' : ''}`"
-          >
-            <div class="cardPreview" ref="cardPreview">
-              <v-img :src="require(`../assets/${cardType.assets.card_bg}`)" @load="cardBGLoaded()" />
-              <div class="cardTitle" :style="titleStyleString">
-                {{ $t(`organization.${cardType.organization_type}.card_title`) }}
-              </div>
-              <div class="organizationName" :style="logoStyleString" v-if="cardType.assets.logo">
-                <v-img :src="require(`@/assets/${cardType.assets.logo}`)" width="84px" class="mr-2" />
-                {{
-                  $t(`organization.${cardType.organization_type}.name`, "ja", {
-                    msg: $t(`bird.${cardType.bird_type}`, "ja").toString(),
-                  })
-                }}
-              </div>
-              <div class="photoPreview"></div>
-              <div class="infoPreview pa-10" :style="`color: ${cardType.colors.card_info_font};`">
-                <v-card-title class="memberNo ma-2">{{ numberLabel }} {{ memberNo }}</v-card-title>
-                <v-card-title class="division ma-2">{{ $t("caption.division", { msg: division }) }}</v-card-title>
-                <div class="memberName" :style="memberNameStyle">{{ memberName }}</div>
-              </div>
-              <v-img class="cardOverlay" :src="cardOverlay ? require(`../assets/${cardOverlay}`) : ''" />
-            </div>
-          </div>
-          <v-row v-if="forStaff">
+    <v-stepper non-linear v-model="e1">
+      <v-stepper-header v-show="false">
+        <v-stepper-step editable step="1"
+          ><span class="ml-1"> {{ $t("common.select_photo") }} </span></v-stepper-step
+        >
+        <v-stepper-step editable step="2"
+          ><span class="ml-1">{{ $t("uni_maker.uni_settings") }}</span></v-stepper-step
+        >
+      </v-stepper-header>
+      <v-stepper-items>
+        <v-stepper-content step="1">
+          <v-row no-gutters justify="center" align-content="center" class="mb-2">
+            <v-btn color="primary" class="text-none" @click="fileInput.click()" outlined>
+              <v-icon left> mdi-camera </v-icon>
+              {{ $t("common.select_photo") }}
+            </v-btn>
             <v-spacer />
-            <v-checkbox v-model="trim" :label="$t('labels.hide_bleed')" row style="display: inline"></v-checkbox>
-            <v-spacer />
+            <v-btn color="primary" @click="e1 = 2" :disabled="!cropedImg">
+              {{ $t("common.next") }}
+              <v-icon>mdi-arrow-right</v-icon>
+            </v-btn>
           </v-row>
-        </v-col>
-        <v-col>
-          <!-- {{ uniProp }} -->
-          <v-slider v-model="uniProp.canvas.width" label="canvas幅" min="200" max="1000"></v-slider>
-          <v-slider v-model="uniProp.canvas.height" label="canvas高さ" min="200" max="1000"></v-slider>
-          <!-- <v-slider v-model="uniProp.center.x" label="中心X" min="0" :max="uniProp.canvas.width"></v-slider>
-          <v-slider v-model="uniProp.center.y" label="中心Y" min="0" :max="uniProp.canvas.height"></v-slider> -->
-          <v-slider v-model="uniProp.lineWidth" label="線の太さ" min="10" max="180"></v-slider>
-          <v-slider v-model="uniProp.lineNum" label="線の数" min="30" max="500"></v-slider>
-          <v-slider v-model="uniProp.circleRadius.min" label="中心半径" min="10" max="300"></v-slider>
-          <v-slider v-model="uniProp.circleRadius.amplitude" label="ぎざぎざ度合い" min="0" max="100"></v-slider>
-          <v-color-picker
-            v-model="uniProp.lineColor"
-            dot-size="25"
-            swatches-max-height="200"
-            mode="hexa"
-          ></v-color-picker>
-          <v-btn @click="createCardImage(false)" :disabled="!file" color="primary">
-            <v-icon class="mr-2">mdi-smart-card-outline</v-icon>{{ $t("common.issue") }}
-          </v-btn>
-        </v-col>
-        <v-col v-show="false">
-          <v-text-field :label="numberLabel" v-model="memberNo" />
-          <v-text-field :label="$t('labels.division_name')" v-model="division" />
-          <v-text-field :label="$t('labels.member_name')" v-model="memberName" />
-          <v-text-field
-            v-if="forStaff"
-            :label="$t('common.dl_file_name')"
-            hint="指定しない場合は {組合員No.}_{支部名}_{おなまえ}.png となります。"
-            v-model="downloadFileName"
-          />
-          <v-card-actions>
-            <v-spacer />
-            <v-btn @click="createCardImage(false)" :disabled="!file" color="primary" v-if="forStaff"
-              ><v-icon class="mr-2">mdi-smart-card-outline</v-icon>{{ $t("common.show_copy") }}</v-btn
-            >
-            <v-btn @click="createCardImage(false)" :disabled="!file" color="primary" v-else
-              ><v-icon class="mr-2">mdi-smart-card-outline</v-icon>{{ $t("common.issue") }}</v-btn
-            >
-            <v-btn @click="createCardImage(true)" :disabled="!file" color="primary" v-if="forStaff"
-              ><v-icon>mdi-download</v-icon>{{ $t("common.download_copy") }}</v-btn
-            >
-          </v-card-actions>
-        </v-col>
-      </v-row>
-    </v-card>
 
-    <v-overlay v-model="canvas">
+          <v-row no-gutters justify="center" align-content="center">
+            <v-col align="center" cols="12" md="6">
+              <vue-cropper
+                ref="cropper"
+                class="ma-3 cropper"
+                :style="`background-color: ${cardType.colors.default_photo_bg};`"
+                :guides="true"
+                :view-mode="2"
+                drag-mode="crop"
+                :background="true"
+                :rotatable="true"
+                :aspect-ratio="1 / 1"
+                alt="No Image..."
+                :src="imgSrc"
+                preview=".photoPreview"
+                @cropend="cropImage"
+                @ready="cropImage"
+              />
+            </v-col>
+          </v-row>
+          <v-row no-gutters justify="center" align-content="center">
+            <v-col class="pa-3" cols="12" md="6">
+              <input
+                ref="fileInput"
+                style="display: none"
+                type="file"
+                accept="image/jpeg, image/jpg, image/png"
+                @change="onChangeFileInput"
+              />
+            </v-col>
+          </v-row>
+        </v-stepper-content>
+
+        <v-stepper-content step="2">
+          <v-row no-gutters justify="center" align-content="center" class="mb-2">
+            <v-col>
+              <v-btn @click="e1 = 1" color="primary"
+                ><v-icon class="mr-2">mdi-arrow-left</v-icon>{{ $t("common.back") }}</v-btn
+              >
+              <v-spacer />
+            </v-col>
+          </v-row>
+          <v-row no-gutters justify="center" align-content="center">
+            <v-col cols="12" md="6">
+              <div
+                class="uniFrame"
+                ref="uniFrame"
+                @click="uniClick"
+                :style="`width:${uniProp.canvas.width}px; height:${uniProp.canvas.height}px; zoom: ${zoom}; ${
+                  canvas ? 'position:absolute; left: -1920px;' : ''
+                }`"
+              >
+                <v-img
+                  :src="cropedImg"
+                  class="uniPhoto"
+                  :width="uniProp.canvas.width"
+                  :height="uniProp.canvas.height"
+                />
+                <canvas
+                  class="uniCanvas"
+                  ref="uniCanvas"
+                  :width="uniProp.canvas.width"
+                  :height="uniProp.canvas.height"
+                ></canvas>
+              </div>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-row no-gutters justify="center" align-content="center">
+                <v-card-text>{{ $t("uni_maker.msg_tap_uni_position") }}</v-card-text>
+                <v-btn-toggle v-model="uniBG" mandatory color="primary" :label="$t('uni_maker.plain')">
+                  <v-btn>{{ $t("uni_maker.plain") }}</v-btn>
+                  <v-btn v-for="(asset, index) in uniBGAssets" :key="asset.name">
+                    <v-img :src="overlayImgList[index]" width="48"></v-img>
+                  </v-btn>
+                </v-btn-toggle>
+              </v-row>
+              <v-toolbar class="ma-0" elevation="0">
+                <template>
+                  <v-menu bottom offset-y>
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-btn dense v-bind="attrs" v-on="on" icon :disabled="imageOverlay" color="primary">
+                        <v-icon>mdi-palette</v-icon>
+                      </v-btn>
+                    </template>
+                    <v-card :width="dispWidth" class="pa-3">
+                      <v-card-title
+                        >{{ $t("uni_maker.color") }}<v-spacer /><v-btn icon
+                          ><v-icon>mdi-close</v-icon></v-btn
+                        ></v-card-title
+                      >
+                      <v-color-picker
+                        v-model="uniProp.lineColor"
+                        dot-size="25"
+                        swatches-max-height="140"
+                        mode="hexa"
+                        show-swatches
+                        hide-sliders
+                        hide-canvas
+                        hide-inputs
+                      >
+                      </v-color-picker>
+                    </v-card>
+                  </v-menu>
+                  <v-menu bottom offset-y>
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-btn v-bind="attrs" v-on="on" icon color="primary"><v-icon>mdi-octagram</v-icon></v-btn>
+                    </template>
+                    <v-card :width="dispWidth" class="pa-3">
+                      <v-card-title
+                        >{{ $t("uni_maker.shape") }}<v-spacer /><v-btn icon
+                          ><v-icon>mdi-close</v-icon></v-btn
+                        ></v-card-title
+                      >
+                      <v-slider
+                        v-show="false"
+                        v-model="uniProp.canvas.width"
+                        :label="$t('uni_maker.canvas_weight')"
+                        min="400"
+                        max="2000"
+                      ></v-slider>
+                      <v-slider
+                        v-show="false"
+                        v-model="uniProp.canvas.height"
+                        :label="$t('uni_maker.canvas_height')"
+                        min="400"
+                        max="2000"
+                      ></v-slider>
+                      <v-slider
+                        v-model="uniProp.circleRadius.min"
+                        :label="$t('uni_maker.size')"
+                        min="20"
+                        max="600"
+                      ></v-slider>
+                      <v-slider
+                        v-model="uniProp.circleRadius.amplitude"
+                        :label="$t('uni_maker.naughtiness')"
+                        min="0"
+                        max="100"
+                      ></v-slider>
+                    </v-card>
+                  </v-menu>
+                  <v-menu bottom offset-y>
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-btn v-bind="attrs" v-on="on" icon color="primary"><v-icon>mdi-cog</v-icon></v-btn>
+                    </template>
+                    <v-card :width="dispWidth" class="pa-3">
+                      <v-card-title>
+                        {{ $t("uni_maker.other_settings") }}<v-spacer /><v-btn icon
+                          ><v-icon>mdi-close</v-icon></v-btn
+                        ></v-card-title
+                      >
+                      <v-slider
+                        v-model="uniProp.lineWidth"
+                        :label="$t('uni_maker.line_width')"
+                        min="10"
+                        max="180"
+                      ></v-slider>
+                      <v-slider
+                        v-model="uniProp.lineNum"
+                        :label="$t('uni_maker.line_number')"
+                        min="30"
+                        max="500"
+                      ></v-slider>
+                    </v-card>
+                  </v-menu>
+                  <v-btn @click="onChangeUniProp(uniProp, uniProp)" icon color="primary">
+                    <v-icon>mdi-reload</v-icon>
+                  </v-btn>
+                  <v-spacer />
+                  <v-btn @click="createCardImage(false)" color="primary" depressed>
+                    <v-icon class="mr-2">mdi-waves-arrow-up</v-icon>{{ $t("uni_maker.create") }}
+                  </v-btn>
+                </template>
+              </v-toolbar>
+            </v-col>
+          </v-row>
+        </v-stepper-content>
+      </v-stepper-items>
+    </v-stepper>
+
+    <v-overlay v-show="canvas">
       <v-progress-circular color="primary" indeterminate />
     </v-overlay>
 
@@ -170,20 +218,39 @@
             })
           }}</span>
           <span v-else>
-            {{
-              $t("messages.card_issued", {
-                card: $t(`organization.${cardType.organization_type}.card`).toString().toLowerCase(),
-              })
-            }}
+            {{ $t("uni_maker.msg_created") }}
           </span>
           <v-spacer />
         </v-card-title>
         <v-card-text align="center">{{ $t("messages.save_image") }}</v-card-text>
-        <v-card-text align="center">
+        <v-card-text align="center" class="pa-0">
           <img :src="dataURL" style="max-width: min(90%, 720px)" />
         </v-card-text>
         <v-card-text align="center" v-if="false">
           <img :src="cropedImg" style="max-width: min(90%, 720px)" />
+        </v-card-text>
+        <v-card-text align="center">
+          {{ $t("messages.share_image") }}
+          <v-dialog v-model="tweetDialog" width="500">
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn icon v-bind="attrs" v-on="on">
+                <v-icon color="light-blue">mdi-twitter</v-icon>
+              </v-btn>
+            </template>
+            <v-card>
+              <v-card-title>{{ $t("common.attention") }}</v-card-title>
+              <v-card-text>
+                {{ $t("messages.tweet_attention") }}
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer />
+                <v-btn :href="tweetShareURL" target="_blank">
+                  <v-icon color="light-blue">mdi-twitter</v-icon>
+                  {{ $t("common.tweet") }}
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
         </v-card-text>
         <v-card-actions>
           <v-spacer />
@@ -194,12 +261,21 @@
     </v-dialog>
   </div>
 </template>
+<style>
+@media only screen and (max-width: 959px) {
+  .v-stepper:not(.v-stepper--vertical) .v-stepper__label {
+    display: flex !important;
+  }
+}
+</style>
 <style scoped>
 @font-face {
   font-family: "Yasashisa Bold";
   src: url("@/assets/fonts/yasashisa.ttf") format("truetype");
 }
 .uniFrame {
+  margin-right: auto;
+  margin-left: auto;
   position: relative;
 }
 .uniPhoto {
@@ -303,6 +379,11 @@
   min-height: 200px;
   text-align: center;
 }
+@media only screen and (max-width: 959px) {
+  .v-stepper:not(.v-stepper--vertical) .v-stepper__label {
+    display: flex !important;
+  }
+}
 </style>
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
@@ -330,29 +411,54 @@ export default class CardMaker extends Vue {
   private downloadFileName = "";
   private dataURL = "";
   private dialog = false;
+  private tweetDialog = false;
   private canvas = false;
   private play = false;
   private playFrameMS = 150;
-  private imageOverlay = false;
   private issueImageScale = 1;
+  private uniBGAssets = [
+    {
+      name: "sea",
+      path: "uniBG03.png",
+    },
+    {
+      name: "sea2",
+      path: "uniBG02.png",
+    },
+    {
+      name: "leaf",
+      path: "uniBG04.png",
+    },
+  ];
+  private overlayImgList: HTMLImageElement[] = [];
+  private e1 = 1;
+  private uniBG = 0;
   private uniProp = {
     canvas: {
-      width: 600,
-      height: 600,
+      width: 1200,
+      height: 1200,
     },
-    lineNum: 250,
-    lineWidth: 200,
+    lineNum: 450,
+    lineWidth: 140,
     center: {
-      x: 300,
-      y: 300,
+      x: 600,
+      y: 600,
     },
     circleRadius: {
-      amplitude: 25,
-      min: 35,
+      amplitude: 50,
+      min: 160,
     },
-    lineColor: { hex: "#000000" },
+    lineColor: {
+      alpha: 1,
+      hex: "#000000",
+      hexa: "#000000FF",
+      hue: 0,
+      rgba: { r: 255, g: 0, b: 0, a: 1 },
+    },
   };
-
+  get computedUniProp() {
+    return JSON.parse(JSON.stringify(this.uniProp));
+  }
   created() {
     const staff = this.$route.query.staff;
     if (staff != null) {
@@ -362,7 +468,11 @@ export default class CardMaker extends Vue {
 
   mounted() {
     this.imgSrc = require(`@/assets/${this.cardType?.assets.default_photo}`);
-    this.uniProp.lineColor.hex = "#000000";
+    this.uniBGAssets.forEach((asset) => {
+      const img = new Image();
+      img.src = require(`@/assets/${asset.path}`);
+      this.overlayImgList.push(img);
+    });
   }
 
   @Watch("cardType")
@@ -370,32 +480,42 @@ export default class CardMaker extends Vue {
     this.imgSrc = require(`@/assets/${this.cardType?.assets.default_photo}`);
   }
 
-  @Watch("uniProp", { deep: true })
-  onChangeUniProp() {
-    if (this.cropedImg != "") {
-      this.play = false;
-      this.drawFocusLine();
+  @Watch("computedUniProp", { deep: true })
+  onChangeUniProp(after: any, before: any) {
+    let refresh = true;
+    if (JSON.stringify(before.lineColor) != JSON.stringify(after.lineColor)) {
+      refresh = false;
+      // this.imageOverlay = false;
     }
+    // if (this.cropedImg != "") {
+    this.play = false;
+    this.drawFocusLine(refresh);
+    // }
   }
 
   @Watch("play")
   onChangePlay(play: boolean) {
     if (play) {
-      this.drawFocusLine();
+      this.drawFocusLine(false);
     }
+  }
+
+  @Watch("uniBG")
+  onChangeBGImage() {
+    this.drawFocusLine(false);
   }
 
   @Watch("imageOverlay")
   onChangeImageOverlay() {
-    this.drawFocusLine();
+    this.drawFocusLine(false);
   }
 
   private uniClick(event: PointerEvent) {
     // console.log(event.offsetX, event.offsetY);
-    this.uniProp.center = { x: event.offsetX, y: event.offsetY };
+    this.uniProp.center = { x: event.offsetX / this.zoom, y: event.offsetY / this.zoom };
   }
 
-  private drawFocusLine() {
+  private drawFocusLine(refresh?: boolean) {
     const canvas = this.$refs.uniCanvas as HTMLCanvasElement;
     this.focusLine(
       canvas,
@@ -405,12 +525,21 @@ export default class CardMaker extends Vue {
       this.uniProp.lineNum,
       this.uniProp.circleRadius.min + this.uniProp.circleRadius.amplitude,
       this.uniProp.circleRadius.min,
-      this.uniProp.lineColor.hex
+      this.uniProp.lineColor.hex,
+      refresh
     );
+  }
+
+  private get imageOverlay(): boolean {
+    return this.uniBG != 0;
   }
 
   private get cropper() {
     return this.$refs.cropper as any;
+  }
+
+  private get fileInput() {
+    return this.$refs.fileInput as any;
   }
 
   get trimClass(): string {
@@ -445,17 +574,33 @@ export default class CardMaker extends Vue {
     return this.cardType?.assets.overlay;
   }
 
+  get dispWidth(): number {
+    return this.$vuetify.breakpoint.width;
+  }
+
+  get mdColWidth(): number {
+    if (this.$vuetify.breakpoint.mdAndUp) return this.dispWidth / 2;
+    else return this.dispWidth;
+  }
+
   get zoom(): number {
     if (this.canvas) {
       return 1;
     } else {
-      const dispWidth = this.$vuetify.breakpoint.width; // - this.$vuetify.breakpoint.scrollBarWidth;
       const root = this.$refs.root as HTMLElement;
-      const [marginTortalm, previewOriginalWidth, maxZoom] = [48, 1920, 0.25];
-      return Math.min((dispWidth - marginTortalm) / previewOriginalWidth, maxZoom);
+      const [marginTortalm, previewOriginalWidth, maxZoom] = [24, this.uniProp.canvas.width, 0.5];
+      return Math.min((this.mdColWidth - marginTortalm) / previewOriginalWidth, maxZoom);
+    }
+  }
+  get overlayImg(): HTMLImageElement {
+    if (this.uniBG > 0 && this.uniBG <= this.overlayImgList.length) {
+      return this.overlayImgList[this.uniBG - 1];
+    } else {
+      return this.overlayImgList[0];
     }
   }
   private onChangeFileInput() {
+    this.file = this.fileInput.files[0];
     if (this.file == null) {
       this.cropper.destroy();
     } else {
@@ -465,7 +610,10 @@ export default class CardMaker extends Vue {
 
   private cropImage() {
     // get image data for post processing, e.g. upload or setting image src
-    this.cropedImg = this.cropper.getCroppedCanvas().toDataURL();
+    if (this.file !== null) {
+      this.cropedImg = this.cropper.getCroppedCanvas().toDataURL();
+      this.drawFocusLine(true);
+    }
   }
   private rotate(deg: number) {
     // guess what this does :)
@@ -534,6 +682,7 @@ export default class CardMaker extends Vue {
     });
   }
 
+  private lines: LineInterface[] = [];
   private focusLine(
     canvas: HTMLCanvasElement,
     centralX: number,
@@ -542,7 +691,8 @@ export default class CardMaker extends Vue {
     lineNum: number,
     circleRadiusMax: number,
     circleRadiusMin: number,
-    lineColor: string
+    lineColor: string,
+    refresh?: boolean
   ) {
     const ctx = canvas.getContext("2d");
     let lines: Liner[] = [];
@@ -552,13 +702,14 @@ export default class CardMaker extends Vue {
         Math.pow(Math.max(canvas.height - centralY, centralY), 2)
     );
 
-    class Liner {
+    class Liner implements LineInterface {
       private deg = 0;
       private moveDeg = 0;
       private endRadius = 0;
       private startPos: Pos = { x: 0, y: 0 };
       private endPos: Pos = { x: 0, y: 0 };
       private movePos: Pos = { x: 0, y: 0 };
+      private lineColor = "#000000FF";
 
       constructor() {
         this.initialize();
@@ -598,6 +749,10 @@ export default class CardMaker extends Vue {
         };
       }
 
+      setColor(color: string) {
+        this.lineColor = color;
+      }
+
       update() {
         this.setPos();
       }
@@ -606,7 +761,7 @@ export default class CardMaker extends Vue {
         if (ctx) {
           ctx.beginPath();
           ctx.lineWidth = 1;
-          ctx.fillStyle = lineColor;
+          ctx.fillStyle = this.lineColor;
           ctx.moveTo(this.startPos.x, this.startPos.y);
           ctx.lineTo(this.movePos.x, this.movePos.y);
           ctx.lineTo(this.endPos.x, this.endPos.y);
@@ -615,38 +770,79 @@ export default class CardMaker extends Vue {
         }
       }
 
-      render() {
-        this.update();
+      render(refresh: boolean) {
+        if (refresh) {
+          this.update();
+        }
         this.draw();
       }
     }
+
     const createLines = (num: number) => {
-      lines = [];
-      [...Array(num)].map(() => lines.push(new Liner()));
-    };
-    const render = () => {
-      if (ctx) ctx.globalCompositeOperation = "source-over";
-      ctx?.clearRect(0, 0, canvas.width, canvas.height);
-      lines.forEach((l) => l.render());
-      if (this.imageOverlay) {
-        const img = new Image();
-        img.src = require(`../assets/cardBG.png`);
-        img.onload = function () {
-          console.log("Image onload");
-          // ctx?.save();
-          if (ctx) ctx.globalCompositeOperation = "source-in";
-          ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
-        };
-      }
-      if (this.play) setTimeout(() => render(), this.playFrameMS);
+      this.lines = [];
+      [...Array(num)].map(() => this.lines.push(new Liner()));
     };
 
-    createLines(lineNum);
-    render();
+    const render = (refresh: boolean) => {
+      if (ctx) ctx.globalCompositeOperation = "source-over";
+      ctx?.clearRect(0, 0, canvas.width, canvas.height);
+      this.lines.forEach((l) => {
+        l.setColor(lineColor);
+        l.render(refresh);
+      });
+      if (this.imageOverlay) {
+        if (ctx) ctx.globalCompositeOperation = "source-in";
+        const [width, height] = [this.overlayImg.width, this.overlayImg.height];
+        let origin = { x: 0, y: 0 };
+        if (width - height > 0) {
+          // 高さの方が短い
+          // 比率チェック
+          const scale = canvas.height / height;
+          const gap = (width * scale - canvas.width) / 2;
+          ctx?.drawImage(this.overlayImg, gap * -1, 0, width * scale, canvas.height);
+        } else {
+          // 幅の方が短い
+          const scale = canvas.width / width;
+          const gap = (height * scale - canvas.height) / 2;
+          ctx?.drawImage(this.overlayImg, 0, gap * -1, canvas.height, height * scale);
+        }
+      }
+      if (this.play) setTimeout(() => render(refresh), this.playFrameMS);
+    };
+
+    const shouldRefresh = refresh || this.lines.length == 0;
+    if (shouldRefresh) {
+      createLines(lineNum);
+    }
+    render(shouldRefresh);
+  }
+
+  get orgNameHashTag(): string {
+    return `#${this.$t("uni_maker.app_name")}`;
+  }
+
+  get shareText(): string {
+    return encodeURIComponent(`${this.$t("uni_maker.msg_created")}
+
+${this.orgNameHashTag}
+`);
+  }
+
+  get tweetShareURL(): string {
+    let url = `${location.protocol}//${location.host}${location.pathname}`;
+    const shareURL = `https://twitter.com/intent/tweet?text=${this.shareText}&url=${url}`;
+    return shareURL;
   }
 }
 interface Pos {
   x: number;
   y: number;
+}
+interface LineInterface {
+  update(): void;
+  setPos(): void;
+  draw(): void;
+  render(refresh: boolean): void;
+  setColor(color: string): void;
 }
 </script>
