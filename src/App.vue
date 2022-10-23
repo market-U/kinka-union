@@ -33,7 +33,7 @@
     <v-navigation-drawer v-model="drawer" temporary fixed width="280px">
       <v-list>
         <v-list-item-group color="primary">
-          <v-list-item v-for="item in menuItems" :key="`${item.bird_type}`" :to="`/card/${item.bird_type}`">
+          <v-list-item v-for="item in menuItems" :key="`${item.bird_type}`" :to="`/${item.component}${item.bird_type}`">
             <v-list-item-icon
               ><v-img :src="require(`@/assets/${item.assets.default_photo}`)" width="40px"
             /></v-list-item-icon>
@@ -75,7 +75,7 @@ import { CardType } from "./module/MODEL";
 export default class App extends Vue {
   private selectedLocaleIndex = 0;
   private drawer = false;
-  private menuItems: CardType[] = [MODEL.kinka, MODEL.buncho, MODEL.hatchan];
+  private menuItems: CardType[] = [MODEL.kinka, MODEL.buncho, MODEL.hatchan, MODEL.uni];
   get mobile(): boolean {
     return this.$vuetify.breakpoint.mobile;
   }

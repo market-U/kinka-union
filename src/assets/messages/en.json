@@ -7,7 +7,12 @@
     "issue": "Issue!",
     "show_copy": "Show Copy",
     "dl_file_name": "Download File Name",
-    "logo_spacing": "0em"
+    "logo_spacing": "0em",
+    "select_photo": "Select Photo",
+    "next": "Next",
+    "back": "Back",
+    "attention": "ATTENTION",
+    "tweet": "Open Twitter"
   },
   "labels": {
     "photo_section_title": "Face Photo Registration",
@@ -22,7 +27,8 @@
     "card_issued": "Your {card} has been issued.",
     "card_copy_issued": "The copy of {card} has been created.",
     "save_image": "Save the image by pressing and holding the screen or right-clicking the mouse.",
-    "share_image": "Attach your saved image and tweet it!"
+    "share_image": "Attach your saved image and tweet it!",
+    "tweet_attention": "The image is not automatically attached to the tweet. Please save the image in advance and attach it to the tweet yourself."
   },
   "caption": {
     "division": "{msg} Branch"
@@ -48,11 +54,37 @@
       "membership_no": "Membership No.",
       "card": "Membership card",
       "card_title": "HATCHAN FAN CLUB"
+    },
+    "kaiwai": {
+      "name": "{msg} Neighborhood",
+      "member": "Residents",
+      "membership_no": "Resident number",
+      "card": "Certificate of residence",
+      "card_title": "Certificate of residence"
     }
   },
   "bird": {
     "kinka": "Kinka",
     "buncho": "Buncho",
-    "hatchan": "Hatchan"
+    "hatchan": "Hatchan",
+    "uni": "Urchin"
+  },
+  "uni_maker": {
+    "app_name": "UrchinMaker",
+    "uni_settings": "Urchin Settings",
+    "plain": "Plain",
+    "background": "Background",
+    "color": "Color",
+    "shape": "Shape",
+    "size": "Size",
+    "naughtiness": "Naughtiness",
+    "canvas_height": "Height",
+    "canvas_weight": "Width",
+    "line_width": "Line Width",
+    "line_number": "Num of Lines",
+    "create": "Catch",
+    "other_settings": "Other Settings",
+    "msg_tap_uni_position": "Tap the position where you want to make an urchin.",
+    "msg_created": "You catched an urchin！"
   }
 }
