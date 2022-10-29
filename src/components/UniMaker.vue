@@ -58,44 +58,51 @@
 
         <v-stepper-content step="2">
           <v-row no-gutters justify="center" align-content="center" class="mb-2">
-            <v-col>
-              <v-btn @click="e1 = 1" color="primary"
-                ><v-icon class="mr-2">mdi-arrow-left</v-icon>{{ $t("common.back") }}</v-btn
-              >
-              <v-spacer />
-            </v-col>
+            <v-btn @click="e1 = 1" color="primary"
+              ><v-icon class="mr-2">mdi-arrow-left</v-icon>{{ $t("common.back") }}</v-btn
+            >
+            <v-spacer />
+            <v-btn @click="createCardImage(false)" color="accent">
+              <v-icon class="mr-2">mdi-waves-arrow-up</v-icon>{{ $t("uni_maker.create") }}
+            </v-btn>
           </v-row>
           <v-row no-gutters justify="center" align-content="center">
             <v-col cols="12" md="6">
-              <div
-                class="uniFrame"
-                ref="uniFrame"
-                @click="uniClick"
-                :style="`width:${uniProp.canvas.width}px; height:${uniProp.canvas.height}px; zoom: ${zoom}; ${
-                  canvas ? 'position:absolute; left: -1920px;' : ''
-                }`"
-              >
-                <v-img
-                  :src="cropedImg"
-                  class="uniPhoto"
-                  :width="uniProp.canvas.width"
-                  :height="uniProp.canvas.height"
-                />
-                <canvas
-                  class="uniCanvas"
-                  ref="uniCanvas"
-                  :width="uniProp.canvas.width"
-                  :height="uniProp.canvas.height"
-                ></canvas>
+              <div style="position: relative">
+                <div
+                  class="uniFrame"
+                  ref="uniFrame"
+                  @click="uniClick"
+                  @touchstart="uniTouchStart"
+                  @touchend="uniTouchEnd"
+                  @touchmove="uniTouch"
+                  :style="`width:${uniProp.canvas.width}px; height:${uniProp.canvas.height}px; zoom: ${zoom}; ${
+                    canvas ? 'position:absolute; left: -1920px;' : ''
+                  }`"
+                >
+                  <v-img
+                    :src="cropedImg"
+                    class="uniPhoto"
+                    :width="uniProp.canvas.width"
+                    :height="uniProp.canvas.height"
+                  />
+                  <canvas
+                    class="uniCanvas"
+                    ref="uniCanvas"
+                    :width="uniProp.canvas.width"
+                    :height="uniProp.canvas.height"
+                    style="touch-action: none"
+                  ></canvas>
+                </div>
               </div>
             </v-col>
             <v-col cols="12" md="6">
               <v-row no-gutters justify="center" align-content="center">
                 <v-card-text>{{ $t("uni_maker.msg_tap_uni_position") }}</v-card-text>
-                <v-btn-toggle v-model="uniBG" mandatory color="primary" :label="$t('uni_maker.plain')">
-                  <v-btn>{{ $t("uni_maker.plain") }}</v-btn>
-                  <v-btn v-for="(asset, index) in uniBGAssets" :key="asset.name">
-                    <v-img :src="overlayImgList[index]" width="48"></v-img>
+                <v-btn-toggle v-model="uniBG" mandatory color="primary" :label="$t('uni_maker.background')">
+                  <v-btn><v-icon :color="uniProp.lineColor.hex">mdi-square</v-icon></v-btn>
+                  <v-btn v-for="asset in uniBGAssets" :key="asset.name">
+                    <v-img :src="require(`@/assets/${asset.path}`)" width="40"></v-img>
                   </v-btn>
                 </v-btn-toggle>
               </v-row>
@@ -103,7 +110,7 @@
                 <template>
                   <v-menu bottom offset-y>
                     <template v-slot:activator="{ on, attrs }">
-                      <v-btn dense v-bind="attrs" v-on="on" icon :disabled="imageOverlay" color="primary">
+                      <v-btn dense v-bind="attrs" v-on="on" icon color="primary">
                         <v-icon>mdi-palette</v-icon>
                       </v-btn>
                     </template>
@@ -192,9 +199,13 @@
                     <v-icon>mdi-reload</v-icon>
                   </v-btn>
                   <v-spacer />
-                  <v-btn @click="createCardImage(false)" color="primary" depressed>
-                    <v-icon class="mr-2">mdi-waves-arrow-up</v-icon>{{ $t("uni_maker.create") }}
-                  </v-btn>
+                  <v-btn-toggle v-model="plays" color="primary" rounded>
+                    <v-btn icon>
+                      <v-icon v-show="!play" color="primary">mdi-play</v-icon>
+                      <v-icon v-show="play" color="primary">mdi-pause</v-icon>
+                    </v-btn>
+                  </v-btn-toggle>
+                  <v-spacer />
                 </template>
               </v-toolbar>
             </v-col>
@@ -413,8 +424,9 @@ export default class CardMaker extends Vue {
   private dialog = false;
   private tweetDialog = false;
   private canvas = false;
-  private play = false;
-  private playFrameMS = 150;
+  // private play = false;
+  private plays = null;
+  private playFrameMS = 100;
   private issueImageScale = 1;
   private uniBGAssets = [
     {
@@ -428,6 +440,10 @@ export default class CardMaker extends Vue {
     {
       name: "leaf",
       path: "uniBG04.png",
+    },
+    {
+      name: "battle",
+      path: "uniBG05.png",
     },
   ];
   private overlayImgList: HTMLImageElement[] = [];
@@ -475,6 +491,14 @@ export default class CardMaker extends Vue {
     });
   }
 
+  get play(): boolean {
+    if (this.plays == null) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   @Watch("cardType")
   onChangeCardType() {
     this.imgSrc = require(`@/assets/${this.cardType?.assets.default_photo}`);
@@ -485,10 +509,11 @@ export default class CardMaker extends Vue {
     let refresh = true;
     if (JSON.stringify(before.lineColor) != JSON.stringify(after.lineColor)) {
       refresh = false;
+      this.uniBG = 0;
       // this.imageOverlay = false;
     }
     // if (this.cropedImg != "") {
-    this.play = false;
+    this.plays = null;
     this.drawFocusLine(refresh);
     // }
   }
@@ -496,7 +521,7 @@ export default class CardMaker extends Vue {
   @Watch("play")
   onChangePlay(play: boolean) {
     if (play) {
-      this.drawFocusLine(false);
+      this.drawFocusLine(true);
     }
   }
 
@@ -513,6 +538,59 @@ export default class CardMaker extends Vue {
   private uniClick(event: PointerEvent) {
     // console.log(event.offsetX, event.offsetY);
     this.uniProp.center = { x: event.offsetX / this.zoom, y: event.offsetY / this.zoom };
+  }
+
+  private logging = "";
+  private pinchDist = 0;
+  private pinching = false;
+  private touchCount = 0;
+  private uniTouchStart(event: any) {
+    if (event.changedTouches.length >= 2) {
+      this.pinching = true;
+      const t1 = { x: event.changedTouches[0].clientX, y: event.changedTouches[0].clientY };
+      const t2 = { x: event.changedTouches[1].clientX, y: event.changedTouches[1].clientY };
+      const dist = Math.sqrt(Math.pow(t2.x - t1.x, 2) + Math.pow(t2.y - t2.y, 2));
+      this.pinchDist = dist;
+    }
+    this.touchCount = event.touches.length;
+  }
+  private uniTouchEnd(event: any) {
+    if (event.touches.length == 0) {
+      this.pinching = false;
+      this.pinchDist = 0;
+    }
+    this.touchCount = event.touches.length;
+  }
+  private uniTouch(event: any) {
+    const changedTouchesCount = event.changedTouches.length;
+    this.touchCount = event.touches.length;
+    console.log(event);
+    // this.logging = `${touchCount}`;
+    if (this.touchCount >= 2) {
+      if (!this.pinching) {
+        this.pinching = true;
+      }
+    }
+    if (changedTouchesCount >= 2) {
+      const t1 = { x: event.changedTouches[0].clientX, y: event.changedTouches[0].clientY };
+      const t2 = { x: event.changedTouches[1].clientX, y: event.changedTouches[1].clientY };
+      const dist = Math.sqrt(Math.pow(t2.x - t1.x, 2) + Math.pow(t2.y - t2.y, 2));
+      if (this.pinchDist < dist) {
+        this.uniProp.circleRadius.min = Math.min(600, this.uniProp.circleRadius.min + 10);
+      } else {
+        this.uniProp.circleRadius.min = Math.max(0, this.uniProp.circleRadius.min - 10);
+      }
+      this.pinchDist = dist;
+    } else {
+      if (!this.pinching) {
+        const touch = event.changedTouches[0];
+        const bounds = touch.target.getBoundingClientRect();
+        const x = touch.clientX - bounds.left * this.zoom;
+        const y = touch.clientY - bounds.top * this.zoom;
+        // console.log("要素内で... x=" + x, "y=" + y);
+        this.uniProp.center = { x: x / this.zoom, y: y / this.zoom };
+      }
+    }
   }
 
   private drawFocusLine(refresh?: boolean) {
@@ -588,7 +666,7 @@ export default class CardMaker extends Vue {
       return 1;
     } else {
       const root = this.$refs.root as HTMLElement;
-      const [marginTortalm, previewOriginalWidth, maxZoom] = [24, this.uniProp.canvas.width, 0.5];
+      const [marginTortalm, previewOriginalWidth, maxZoom] = [48, this.uniProp.canvas.width, 0.5];
       return Math.min((this.mdColWidth - marginTortalm) / previewOriginalWidth, maxZoom);
     }
   }
@@ -632,6 +710,7 @@ export default class CardMaker extends Vue {
     this.cropper.reset();
   }
   private async createCardImage(download: boolean) {
+    this.plays = null;
     this.canvas = true;
     Vue.nextTick(async () => {
       const preview: HTMLElement = this.$refs.uniFrame as HTMLElement;
@@ -807,7 +886,10 @@ export default class CardMaker extends Vue {
           ctx?.drawImage(this.overlayImg, 0, gap * -1, canvas.height, height * scale);
         }
       }
-      if (this.play) setTimeout(() => render(refresh), this.playFrameMS);
+      if (this.play)
+        setTimeout(() => {
+          if (this.play) render(refresh);
+        }, this.playFrameMS);
     };
 
     const shouldRefresh = refresh || this.lines.length == 0;
@@ -818,7 +900,7 @@ export default class CardMaker extends Vue {
   }
 
   get orgNameHashTag(): string {
-    return `#${this.$t("uni_maker.app_name")}`;
+    return `#${this.$t("uni_maker.app_name", "ja")} #${this.$t("uni_maker.app_name", "en")}`;
   }
 
   get shareText(): string {

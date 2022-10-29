@@ -85,6 +85,6 @@ export const uni: CardType = {
   theme: {
     primary: "#5881e2",
     secondary: "#f6e528",
-    accent: "#2b3a68",
+    accent: "#e97878",
   },
 } as const;
