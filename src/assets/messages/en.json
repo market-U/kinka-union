@@ -56,7 +56,7 @@
       "card_title": "HATCHAN FAN CLUB"
     },
     "kaiwai": {
-      "name": "{msg} Neighborhood",
+      "name": "{msg} Farm",
       "member": "Residents",
       "membership_no": "Resident number",
       "card": "Certificate of residence",
@@ -85,6 +85,6 @@
     "create": "Catch",
     "other_settings": "Other Settings",
     "msg_tap_uni_position": "Tap the position where you want to make an urchin.",
-    "msg_created": "You catched an urchin！"
+    "msg_created": "You catched an urchin!"
   }
 }
