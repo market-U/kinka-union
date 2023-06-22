@@ -1,23 +1,29 @@
 import Vue from "vue";
 import VueRouter, { RouteConfig } from "vue-router";
-import HomeView from "../views/HomeView.vue";
+import CardMakerView from "../views/CardMakerView.vue";
+import UniMakerView from "../views/UniMakerView.vue";
 
 Vue.use(VueRouter);
 
 const routes: Array<RouteConfig> = [
   {
     path: "/",
-    name: "home",
-    component: HomeView,
+    redirect: "/card/kinka",
   },
-  // {
-  //   path: "/about",
-  //   name: "about",
-  //   // route level code-splitting
-  //   // this generates a separate chunk (about.[hash].js) for this route
-  //   // which is lazy-loaded when the route is visited.
-  //   component: () => import(/* webpackChunkName: "about" */ "../views/AboutView.vue"),
-  // },
+  {
+    path: "/card/:type",
+    name: "home",
+    component: CardMakerView,
+  },
+  {
+    path: "/uni",
+    name: "uni",
+    component: UniMakerView,
+  },
+  {
+    path: "/card/uni",
+    redirect: "/uni",
+  },
 ];
 
 const router = new VueRouter({

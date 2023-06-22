@@ -3,4 +3,19 @@ import Vuetify from "vuetify/lib/framework";
 
 Vue.use(Vuetify);
 
-export default new Vuetify({});
+export default new Vuetify({
+  theme: {
+    themes: {
+      light: {
+        primary: "#ff9800",
+        secondary: "#ffc107",
+        accent: "#4a2d13",
+        error: "#ff5722",
+        warning: "#8bc34a",
+        info: "#00bcd4",
+        success: "#3f51b5",
+      },
+    },
+    options: { customProperties: true },
+  },
+});

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script type="text/javascript">
+      // let segmentCount = 1;
+      let l = window.location;
+      let port = l.port ? ':' + l.port : ''
+      l.replace(
+          // `${l.protocol}//${l.hostname}${port}/kinka-union?p=${l.pathname.split('/').slice(0, 1 + segmentCount).join('/')}`
+          `${l.protocol}//${l.hostname}${port}/kinka-union/?p=${l.pathname.split('/').slice(2).join('/')}`
+      )
+    </script>
+  </head>
+  <body>
+
+  </body>
+</html>
