@@ -1,4 +1,9 @@
 {
   "trailingSlash": "auto",
-  "routes": []
+  "routes": [
+    {
+      "route": "/",
+      "redirect": "/kinka-union2/"
+    }
+  ]
 }
