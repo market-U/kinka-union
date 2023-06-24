@@ -160,7 +160,29 @@
         >
         <v-card-actions>
           <v-spacer />
-          <v-btn @click="closeDialog" color="primary"><v-icon>mdi-close</v-icon>{{ $t("common.close") }}</v-btn>
+          <v-btn @click="closeDialog" color="primary" icon><v-icon>mdi-close</v-icon></v-btn>
+          <v-btn @click="uploadCardImage" color="error"><v-icon>mdi-upload</v-icon>この画像で申し込む</v-btn>
+          <v-spacer />
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog :fullscreen="mobile" v-model="uploadDialog">
+      <v-card class="ma-2">
+        <v-system-bar></v-system-bar>
+        <v-toolbar flat>
+          <v-toolbar-title>My Document</v-toolbar-title>
+        </v-toolbar>
+        <v-card-text>
+          以下のURLにカード画像をアップロードしました。 カードのご購入時、このURLを備考欄に入力してください。
+          <v-text-field readonly :value="uploadURL" />
+          <v-btn icon @click="copyToClipboard(uploadURL)">
+            <v-icon class="ma-2">mdi-content-copy</v-icon>
+          </v-btn>
+        </v-card-text>
+        <v-snackbar v-model="snackbar" type="success" :timeout="timeout"> コピーしました </v-snackbar>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn @click="closeUploadDialog" color="primary" icon><v-icon>mdi-close</v-icon></v-btn>
           <v-spacer />
         </v-card-actions>
       </v-card>
@@ -271,6 +293,8 @@
 import { Component, Prop, Vue, Watch } from "vue-property-decorator";
 import { MODEL } from "@/module";
 import { ref } from "vue";
+import { v4 as uuidv4 } from "uuid";
+import { BlockBlobClient, AnonymousCredential } from "@azure/storage-blob";
 import VueCropper from "vue-cropperjs";
 import html2canvas from "html2canvas";
 import "cropperjs/dist/cropper.css";
@@ -293,7 +317,11 @@ export default class CardMaker extends Vue {
   private downloadFileName = "";
   private dataURL = "";
   private dialog = false;
+  private uploadDialog = false;
   private canvas = false;
+  private snackbar = false;
+  private timeout = 2000;
+  private uploadURL = "";
 
   created() {
     const staff = this.$route.query.staff;
@@ -385,6 +413,7 @@ export default class CardMaker extends Vue {
   private reset(ratio: number) {
     this.cropper.reset();
   }
+
   private async createCardImage(download: boolean) {
     this.canvas = true;
     Vue.nextTick(async () => {
@@ -418,9 +447,61 @@ export default class CardMaker extends Vue {
     });
   }
 
+  private async uploadCardImage(download: boolean) {
+    this.canvas = true;
+    Vue.nextTick(async () => {
+      const preview: HTMLElement = this.$refs.cardPreview as HTMLElement;
+      const params: Parameters<typeof html2canvas> = [preview, { scale: 1 }];
+      const canvasElement = await html2canvas(...params).catch((e) => {
+        console.error(e);
+        return;
+      });
+      if (!canvasElement) {
+        return;
+      }
+      const dataURL = canvasElement.toDataURL("image/png");
+      canvasElement.toBlob((blob) => {
+        if (blob) {
+          this.uploadImgToBlobStorage(blob);
+        }
+      });
+      this.canvas = false;
+    });
+  }
+
+  private generateUUID(): string {
+    return uuidv4();
+  }
+
+  private async uploadImgToBlobStorage(blob: Blob): Promise<void> {
+    const cardID = this.generateUUID();
+    const filename = `${cardID}.png`;
+    fetch("/api/credentials")
+      .then((res) => res.json())
+      .then((json) => {
+        const blockBlobClient = new BlockBlobClient(
+          `${json.url}/${this.cardType!.bird_type}/${filename}?${json.sasToken}`,
+          new AnonymousCredential()
+        );
+        return blockBlobClient.uploadData(blob);
+      })
+      .then((blobRes) => {
+        const href = window.location.href;
+        this.uploadURL = `${href}/copy/${cardID}`;
+        this.uploadDialog = true;
+        return;
+      });
+    return;
+  }
+
   private closeDialog() {
     this.dialog = false;
     this.dataURL = "";
+  }
+
+  private closeUploadDialog() {
+    this.uploadDialog = false;
+    this.uploadURL = "";
   }
 
   private cardBGLoaded() {
@@ -459,6 +540,18 @@ ${this.appNameHashTag}
     let url = `${location.protocol}//${location.host}${location.pathname}`;
     const shareURL = `https://twitter.com/intent/tweet?text=${this.shareText}&url=${url}`;
     return shareURL;
+  }
+
+  private copyToClipboard(text: string) {
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        console.log("copied!");
+        this.snackbar = true;
+      })
+      .catch((e) => {
+        console.error(e);
+      });
   }
 }
 </script>

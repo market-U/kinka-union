@@ -16,6 +16,11 @@ const routes: Array<RouteConfig> = [
     component: CardMakerView,
   },
   {
+    path: "/card/:type/copy/:id",
+    name: "cardcopy",
+    component: CardMakerView,
+  },
+  {
     path: "/uni",
     name: "uni",
     component: UniMakerView,
