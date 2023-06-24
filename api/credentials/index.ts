@@ -12,21 +12,19 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
     const name = (req.query.name || (req.body && req.body.name));
     context.res = {
         // status: 200, /* Defaults to 200 */
-        body: {
-            url: getSasUrl()
-        }
+        body: getSasToken()
     };
 
 };
 
-function getSasUrl(): string {
+function getSasToken(): { url: string, sasToken: string } {
     const connectionString = process.env.STORAGE_CONNECTION_STRING;
     const accountKey = process.env.STORAGE_ACCOUNT_KEY;
     const container = process.env.STORAGE_CONTAINER_NAME;
     return generateSasToken(connectionString, accountKey, container, "rc");
 }
 
-function generateSasToken(connectionString: string, accountKey: string, container: string, permissions: string) {
+function generateSasToken(connectionString: string, accountKey: string, container: string, permissions: string): { url: string, sasToken: string } {
     const containerClient = new ContainerClient(connectionString, container);
     const sharedKeyCredential = new StorageSharedKeyCredential(containerClient.accountName, accountKey);
     const expiryDate = new Date();
@@ -43,7 +41,7 @@ function generateSasToken(connectionString: string, accountKey: string, containe
     const sasToken = generateBlobSASQueryParameters(sasOptions, sharedKeyCredential).toString();
     console.log(`SAS token for blob container is: ${sasToken}`);
 
-    return `${containerClient.url}?${sasToken}`;
+    return { url: containerClient.url, sasToken: sasToken };
 }
 
 export default httpTrigger;
