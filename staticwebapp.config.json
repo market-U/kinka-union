@@ -3,6 +3,7 @@
   "routes": [
   {
     "route": "/*",
+    "serve": "/index.html",
     "allowedRoles": [
       "anonymous"
     ]
