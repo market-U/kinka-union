@@ -1,133 +1,262 @@
 <template>
   <div>
-    <v-card class="ma-3 pa-3">
-      <v-card-title>{{ $t("labels.photo_section_title") }}</v-card-title>
-      <v-row>
-        <v-col align="center" cols="12" md="6">
-          <vue-cropper
-            ref="cropper"
-            class="ma-3 cropper"
-            :style="`background-color: ${cardType.colors.default_photo_bg};`"
-            :guides="true"
-            :view-mode="2"
-            drag-mode="crop"
-            :auto-crop-area="0.5"
-            :min-container-width="250"
-            :min-container-height="180"
-            :background="true"
-            :rotatable="true"
-            alt="No Image..."
-            :src="imgSrc"
-            :aspect-ratio="3 / 4"
-            preview=".photoPreview"
-            @cropend="cropImage"
-          />
-        </v-col>
-        <v-col class="pa-3" cols="12" md="6">
-          <v-file-input
-            class="ma-3"
-            v-model="file"
-            accept="image/*"
-            :label="
-              $t('messages.select_photo', {
-                member: $t(`organization.${cardType.organization_type}.member`).toString().toLowerCase(),
-              })
-            "
-            @change="onChangeFileInput"
-            :clearable="false"
-          />
-          <div class="toolButtons" style="text-align: center">
-            <v-btn @click="rotate(-90)" :disabled="!file" icon color="primary"
-              ><v-icon>mdi-file-rotate-left</v-icon></v-btn
-            >
-            <v-btn @click="rotate(90)" :disabled="!file" icon color="primary"
-              ><v-icon>mdi-file-rotate-right</v-icon></v-btn
-            >
-            <v-btn @click="move(-10, 0)" :disabled="!file" icon color="primary"><v-icon>mdi-arrow-left</v-icon></v-btn>
-            <v-btn @click="move(10, 0)" :disabled="!file" icon color="primary"><v-icon>mdi-arrow-right</v-icon></v-btn>
-            <v-btn @click="move(0, -10)" :disabled="!file" icon color="primary"><v-icon>mdi-arrow-up</v-icon></v-btn>
-            <v-btn @click="move(0, 10)" :disabled="!file" icon color="primary"><v-icon>mdi-arrow-down</v-icon></v-btn>
-            <v-btn @click="relativeZoom(0.1)" :disabled="!file" icon color="primary"
-              ><v-icon>mdi-magnify-plus</v-icon></v-btn
-            >
-            <v-btn @click="relativeZoom(-0.1)" :disabled="!file" icon color="primary"
-              ><v-icon>mdi-magnify-minus</v-icon></v-btn
-            >
-            <v-btn @click="reset()" :disabled="!file" icon color="primary"><v-icon>mdi-undo-variant</v-icon></v-btn>
-          </div>
-        </v-col>
-      </v-row>
-    </v-card>
-    <v-card class="ma-3 pa-3">
-      <v-card-title>{{ $t("labels.card_preview") }}</v-card-title>
-      <v-row>
-        <v-col align="center">
-          <div
-            class="cardFrame"
-            :class="trimClass"
-            ref="cardFrame"
-            :style="`zoom: ${zoom}; ${canvas ? 'position:absolute; left: -1920px;' : ''}`"
-          >
-            <div class="cardPreview" ref="cardPreview">
-              <v-img :src="require(`../assets/${cardType.assets.card_bg}`)" @load="cardBGLoaded()" />
-              <div class="cardTitle" :style="titleStyleString">
-                {{ $t(`organization.${cardType.organization_type}.card_title`) }}
-              </div>
-              <div class="organizationName" :style="logoStyleString" v-if="cardType.assets.logo">
-                <v-img :src="require(`@/assets/${cardType.assets.logo}`)" width="84px" class="mr-2" />
-                {{
-                  $t(`organization.${cardType.organization_type}.name`, "ja", {
-                    msg: $t(`bird.${cardType.bird_type}`, "ja").toString(),
-                  })
-                }}
-              </div>
-              <div class="photoPreview"></div>
-              <div class="infoPreview pa-10" :style="`color: ${cardType.colors.card_info_font};`">
-                <v-card-title class="memberNo ma-2">{{ numberLabel }} {{ memberNo }}</v-card-title>
-                <v-card-title class="division ma-2">{{ $t("caption.division", { msg: division }) }}</v-card-title>
-                <div class="memberName" :style="memberNameStyle">{{ memberName }}</div>
-              </div>
-              <v-img class="cardOverlay" :src="cardOverlay ? require(`../assets/${cardOverlay}`) : ''" />
+    <v-stepper v-model="step" elevation="0" vertical>
+      <v-stepper-step step="1" editable :complete="file != null" edit-icon="$complete">
+        {{ $t("labels.photo_section_title") }}
+      </v-stepper-step>
+      <v-stepper-content step="1">
+        <v-row no-gutters>
+          <v-col align="center" cols="12" md="6">
+            <v-file-input
+              v-model="file"
+              filled
+              rounded
+              dense
+              accept="image/*"
+              :label="
+                $t('messages.select_photo', {
+                  member: $t(`organization.${cardType.organization_type}.member`).toString().toLowerCase(),
+                })
+              "
+              @change="onChangeFileInput"
+              :clearable="false"
+            />
+          </v-col>
+        </v-row>
+        <v-row no-gutters>
+          <v-col align="center" cols="12" md="6">
+            <vue-cropper
+              ref="cropper"
+              class="ma-3 cropper"
+              :style="`background-color: ${cardType.colors.default_photo_bg};`"
+              :guides="true"
+              :view-mode="2"
+              drag-mode="crop"
+              :auto-crop-area="0.5"
+              :min-container-width="250"
+              :min-container-height="180"
+              :background="true"
+              :rotatable="true"
+              alt="No Image..."
+              :src="imgSrc"
+              :aspect-ratio="3 / 4"
+              preview=".photoPreview"
+              @cropend="cropImage"
+            />
+          </v-col>
+          <v-col class="pa-3" cols="12" md="6">
+            <div class="toolButtons" style="text-align: center">
+              <v-btn @click="rotate(-90)" :disabled="!file" icon color="primary"
+                ><v-icon>mdi-file-rotate-left</v-icon></v-btn
+              >
+              <v-btn @click="rotate(90)" :disabled="!file" icon color="primary"
+                ><v-icon>mdi-file-rotate-right</v-icon></v-btn
+              >
+              <v-btn @click="move(-10, 0)" :disabled="!file" icon color="primary"
+                ><v-icon>mdi-arrow-left</v-icon></v-btn
+              >
+              <v-btn @click="move(10, 0)" :disabled="!file" icon color="primary"
+                ><v-icon>mdi-arrow-right</v-icon></v-btn
+              >
+              <v-btn @click="move(0, -10)" :disabled="!file" icon color="primary"><v-icon>mdi-arrow-up</v-icon></v-btn>
+              <v-btn @click="move(0, 10)" :disabled="!file" icon color="primary"><v-icon>mdi-arrow-down</v-icon></v-btn>
+              <v-btn @click="relativeZoom(0.1)" :disabled="!file" icon color="primary"
+                ><v-icon>mdi-magnify-plus</v-icon></v-btn
+              >
+              <v-btn @click="relativeZoom(-0.1)" :disabled="!file" icon color="primary"
+                ><v-icon>mdi-magnify-minus</v-icon></v-btn
+              >
+              <v-btn @click="reset()" :disabled="!file" icon color="primary"><v-icon>mdi-undo-variant</v-icon></v-btn>
             </div>
-          </div>
-          <v-row v-if="forStaff">
-            <v-spacer />
-            <v-checkbox v-model="trim" :label="$t('labels.hide_bleed')" row style="display: inline"></v-checkbox>
-            <v-spacer />
-          </v-row>
-        </v-col>
-        <v-col>
-          <v-text-field :label="numberLabel" v-model="memberNo" />
-          <v-text-field :label="$t('labels.division_name')" v-model="division" />
-          <v-text-field :label="$t('labels.member_name')" v-model="memberName" />
-          <v-text-field
-            v-if="forStaff"
-            :label="$t('common.dl_file_name')"
-            hint="指定しない場合は {組合員No.}_{支部名}_{おなまえ}.png となります。"
-            v-model="downloadFileName"
-          />
-          <v-card-actions>
-            <v-spacer />
-            <v-btn @click="createCardImage(false)" :disabled="!file" color="primary" v-if="forStaff"
-              ><v-icon class="mr-2">mdi-smart-card-outline</v-icon>{{ $t("common.show_copy") }}</v-btn
+          </v-col>
+        </v-row>
+        <v-row no-gutters>
+          <v-col>
+            <v-card-actions>
+              <v-spacer />
+              <v-btn @click="step = 2" color="primary"><v-icon>mdi-redo</v-icon>{{ $t("common.next") }}</v-btn>
+              <!-- <v-btn @click="step = 3" text>next</v-btn> -->
+            </v-card-actions>
+          </v-col>
+        </v-row>
+      </v-stepper-content>
+      <v-stepper-step step="2" editable :complete="profileFilled" edit-icon="$complete">
+        {{ $t("labels.input_profile") }}
+      </v-stepper-step>
+      <v-stepper-content step="2">
+        <v-row>
+          <v-col>
+            <span>
+              {{ $t("labels.card_preview") }}
+            </span>
+            <div
+              class="cardFrame mt-1"
+              :class="trimClass"
+              ref="cardFrame"
+              :style="`zoom: ${zoom}; ${canvas ? 'position:absolute; left: -1920px;' : ''}`"
             >
-            <v-btn @click="createCardImage(false)" :disabled="!file" color="primary" v-else
-              ><v-icon class="mr-2">mdi-smart-card-outline</v-icon>{{ $t("common.issue") }}</v-btn
+              <div class="cardPreview" ref="cardPreview">
+                <v-img :src="require(`../assets/${cardType.assets.card_bg}`)" @load="cardBGLoaded()" />
+                <div class="cardTitle" :style="titleStyleString">
+                  {{ $t(`organization.${cardType.organization_type}.card_title`) }}
+                </div>
+                <div class="organizationName" :style="logoStyleString" v-if="cardType.assets.logo">
+                  <v-img :src="require(`@/assets/${cardType.assets.logo}`)" width="84px" class="mr-2" />
+                  {{
+                    $t(`organization.${cardType.organization_type}.name`, "ja", {
+                      msg: $t(`bird.${cardType.bird_type}`, "ja").toString(),
+                    })
+                  }}
+                </div>
+                <div class="photoPreview"></div>
+                <div class="infoPreview pa-10" :style="`color: ${cardType.colors.card_info_font};`">
+                  <v-card-title class="memberNo ma-2">{{ numberLabel }} {{ memberNo }}</v-card-title>
+                  <v-card-title class="division ma-2">{{ $t("caption.division", { msg: division }) }}</v-card-title>
+                  <div class="memberName" :style="memberNameStyle">{{ memberName }}</div>
+                </div>
+                <v-img class="cardOverlay" :src="cardOverlay ? require(`../assets/${cardOverlay}`) : ''" />
+              </div>
+            </div>
+            <v-row v-if="forStaff">
+              <v-spacer />
+              <v-checkbox v-model="trim" :label="$t('labels.hide_bleed')" row style="display: inline"></v-checkbox>
+              <v-spacer />
+            </v-row>
+          </v-col>
+          <v-col>
+            <v-text-field :label="numberLabel" v-model="memberNo" />
+            <v-text-field :label="$t('labels.division_name')" v-model="division" />
+            <v-text-field :label="$t('labels.member_name')" v-model="memberName" />
+            <v-text-field
+              v-if="forStaff"
+              :label="$t('common.dl_file_name')"
+              hint="指定しない場合は {組合員No.}_{支部名}_{おなまえ}.png となります。"
+              v-model="downloadFileName"
+            />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col>
+            <v-card-actions>
+              <v-spacer />
+              <v-btn @click="step = 1"><v-icon>mdi-undo</v-icon>{{ $t("common.back") }}</v-btn>
+              <!-- <v-btn @click="step = 3" text>next</v-btn> -->
+              <v-btn
+                @click="
+                  createCardImage(false);
+                  step = 3;
+                "
+                :disabled="!filled"
+                color="primary"
+                v-if="forStaff"
+                ><v-icon class="mr-2">mdi-smart-card-outline</v-icon>{{ $t("common.show_copy") }}</v-btn
+              >
+              <v-btn
+                @click="
+                  createCardImage(false);
+                  step = 3;
+                "
+                :disabled="!filled"
+                color="primary"
+                v-else
+                ><v-icon class="mr-2">mdi-smart-card-outline</v-icon>{{ $t("common.issue") }}</v-btn
+              >
+              <v-btn @click="createCardImage(true)" :disabled="!filled" color="primary" v-if="forStaff"
+                ><v-icon>mdi-download</v-icon>{{ $t("common.download_copy") }}</v-btn
+              >
+            </v-card-actions>
+          </v-col>
+        </v-row>
+      </v-stepper-content>
+      <v-stepper-step step="3"> 発行 </v-stepper-step>
+      <v-stepper-content step="3">
+        <v-card-title align="center">
+          <v-spacer />
+          <span v-if="forStaff">{{
+            $t("messages.card_copy_issued", {
+              card: $t(`organization.${cardType.organization_type}.card_title`).toString().toLowerCase(),
+            })
+          }}</span>
+          <span v-else>
+            {{
+              $t("messages.card_issued", {
+                card: $t(`organization.${cardType.organization_type}.card`).toString().toLowerCase(),
+              })
+            }}
+          </span>
+          <v-spacer />
+        </v-card-title>
+        <v-row align="center" no-gutters>
+          <img :src="dataURL" style="max-width: min(100%, 720px)" />
+        </v-row>
+        <v-row>
+          <v-col>
+            <v-alert border="left" class="mr-1 ml-1" colored-border color="primary" elevation="2">
+              <div class="text-body-2">{{ $t("messages.save_image") }}</div>
+              <div class="text-body-2">
+                {{ $t("messages.share_image") }}
+              </div>
+              <v-btn :href="tweetShareURL" target="_blank" icon><v-icon color="light-blue">mdi-twitter</v-icon></v-btn>
+            </v-alert>
+          </v-col>
+        </v-row>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn @click="step = 2"><v-icon>mdi-undo</v-icon>{{ $t("common.back") }}</v-btn>
+          <v-btn @click="dialog = true" color="primary">この画像でカードを申し込む</v-btn>
+
+          <v-spacer />
+        </v-card-actions>
+        <v-dialog v-model="dialog" :fullscreen="mobile">
+          <v-card>
+            <v-system-bar
+              ><v-spacer /><v-btn @click="closeDialog" icon><v-icon>mdi-close</v-icon></v-btn>
+            </v-system-bar>
+            <v-card-title><div>カード製作用データのアップロード</div> </v-card-title>
+            <v-card-text class="text-body-1"
+              >カードの製作を申し込む場合は、この画面からデータをアップロードしてください。</v-card-text
             >
-            <v-btn @click="createCardImage(true)" :disabled="!file" color="primary" v-if="forStaff"
-              ><v-icon>mdi-download</v-icon>{{ $t("common.download_copy") }}</v-btn
-            >
-          </v-card-actions>
-        </v-col>
-      </v-row>
-    </v-card>
+            <v-card-text>
+              <img :src="dataURL" style="max-width: min(100%, 720px)" />
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer />
+              <v-btn @click="uploadCardImage" color="primary" :disabled="uploadURL != ''"
+                ><v-icon>mdi-upload</v-icon>アップロード</v-btn
+              >
+              <v-spacer />
+            </v-card-actions>
+            <v-divider class="mb-4" />
+            <v-card-text v-show="uploadDialog">
+              <div>
+                <v-alert type="info" color="primary" border="top" colored-border elevation="2">
+                  <div>
+                    以下のURLにカード画像をアップロードしました。 カードのご購入時、このURLを備考欄に入力してください。
+                  </div>
+                  <v-divider class="ma-2" />
+                  <div class="breakword text-body-2">{{ uploadURL }}</div>
+                </v-alert>
+                <v-card-actions>
+                  <v-spacer />
+                  <v-btn @click="copyToClipboard(uploadURL)" color="primary">
+                    <v-icon class="ma-2">mdi-content-copy</v-icon>URLをコピーする
+                  </v-btn>
+                  <v-spacer />
+                </v-card-actions>
+              </div>
+            </v-card-text>
+          </v-card>
+          <v-snackbar v-model="snackbar" type="success" :timeout="timeout"> コピーしました </v-snackbar>
+        </v-dialog>
+      </v-stepper-content>
+    </v-stepper>
 
     <v-overlay v-model="canvas">
       <v-progress-circular color="primary" indeterminate />
     </v-overlay>
 
     <!-- issue dialog -->
-    <v-dialog v-model="dialog">
+    <!-- <v-dialog v-model="dialog">
       <v-card style="background-color: white">
         <v-system-bar height="36">
           <v-spacer />
@@ -181,7 +310,7 @@
         </v-card-text>
         <v-snackbar v-model="snackbar" type="success" :timeout="timeout"> コピーしました </v-snackbar>
       </v-card>
-    </v-dialog>
+    </v-dialog> -->
   </div>
 </template>
 <style scoped>
@@ -284,7 +413,7 @@
   text-align: center;
 }
 .breakword {
-  word-wrap: break-word;
+  word-break: break-all;
 }
 </style>
 <script lang="ts">
@@ -320,6 +449,7 @@ export default class CardMaker extends Vue {
   private snackbar = false;
   private timeout = 2000;
   private uploadURL = "";
+  private step = 1;
 
   created() {
     const staff = this.$route.query.staff;
@@ -343,6 +473,10 @@ export default class CardMaker extends Vue {
 
   get trimClass(): string {
     return this.trim ? "overflowHidden" : "";
+  }
+
+  get profileFilled(): boolean {
+    return this.memberNo !== "" && this.memberName !== "" && this.division !== "";
   }
 
   get filled(): boolean {
@@ -440,12 +574,11 @@ export default class CardMaker extends Vue {
         link.click();
       } else {
         this.dataURL = dataURL;
-        this.dialog = true;
       }
     });
   }
 
-  private async uploadCardImage(download: boolean) {
+  private async uploadCardImage() {
     this.canvas = true;
     Vue.nextTick(async () => {
       const preview: HTMLElement = this.$refs.cardPreview as HTMLElement;
@@ -455,15 +588,19 @@ export default class CardMaker extends Vue {
         return;
       });
       if (!canvasElement) {
+        console.error("canvasElement not found");
         return;
       }
-      const dataURL = canvasElement.toDataURL("image/png");
       canvasElement.toBlob((blob) => {
         if (blob) {
-          this.uploadImgToBlobStorage(blob);
+          this.uploadImgToBlobStorage(blob).finally(() => {
+            this.canvas = false;
+          });
+        } else {
+          console.error("blob from canvasElement not found");
+          this.canvas = false;
         }
       });
-      this.canvas = false;
     });
   }
 
@@ -495,9 +632,13 @@ export default class CardMaker extends Vue {
     return;
   }
 
+  private resetImageData() {
+    this.dataURL = "";
+    this.uploadURL = "";
+  }
+
   private closeDialog() {
     this.dialog = false;
-    this.dataURL = "";
     this.closeUploadDialog();
   }
 
