@@ -127,9 +127,13 @@
     </v-overlay>
 
     <!-- issue dialog -->
-    <v-dialog :fullscreen="mobile" v-model="dialog">
+    <v-dialog v-model="dialog">
       <v-card style="background-color: white">
-        <v-card-title>
+        <v-system-bar height="36">
+          <v-spacer />
+          <v-btn @click="closeDialog" icon><v-icon>mdi-close</v-icon></v-btn>
+        </v-system-bar>
+        <v-card-title align="center">
           <v-spacer />
           <span v-if="forStaff">{{
             $t("messages.card_copy_issued", {
@@ -145,46 +149,37 @@
           </span>
           <v-spacer />
         </v-card-title>
-        <v-card-text align="center">{{ $t("messages.save_image") }}</v-card-text>
         <v-card-text align="center">
           <img :src="dataURL" style="max-width: min(90%, 720px)" />
         </v-card-text>
         <v-card-text align="center" v-if="false">
           <img :src="cropedImg" style="max-width: min(90%, 720px)" />
         </v-card-text>
-        <v-card-text align="center">
-          {{ $t("messages.share_image") }}
-          <v-btn :href="tweetShareURL" target="_blank" icon
-            ><v-icon color="light-blue">mdi-twitter</v-icon></v-btn
-          ></v-card-text
-        >
+        <v-card-text>
+          <li>
+            <span>{{ $t("messages.save_image") }}</span>
+          </li>
+          <li>
+            <span> {{ $t("messages.share_image") }}</span>
+            <v-btn :href="tweetShareURL" target="_blank" icon><v-icon color="light-blue">mdi-twitter</v-icon></v-btn>
+          </li>
+        </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn @click="closeDialog" color="primary" icon><v-icon>mdi-close</v-icon></v-btn>
-          <v-btn @click="uploadCardImage" color="error"><v-icon>mdi-upload</v-icon>この画像で申し込む</v-btn>
+          <v-btn @click="uploadCardImage" color="error" :disabled="uploadDialog"
+            ><v-icon>mdi-upload</v-icon>この画像でカードを申し込む</v-btn
+          >
           <v-spacer />
         </v-card-actions>
-      </v-card>
-    </v-dialog>
-    <v-dialog :fullscreen="mobile" v-model="uploadDialog">
-      <v-card class="ma-2">
-        <v-system-bar></v-system-bar>
-        <v-toolbar flat>
-          <v-toolbar-title>My Document</v-toolbar-title>
-        </v-toolbar>
-        <v-card-text>
-          以下のURLにカード画像をアップロードしました。 カードのご購入時、このURLを備考欄に入力してください。
-          <v-text-field readonly :value="uploadURL" />
-          <v-btn icon @click="copyToClipboard(uploadURL)">
-            <v-icon class="ma-2">mdi-content-copy</v-icon>
-          </v-btn>
+        <v-card-text v-if="uploadDialog">
+          <v-alert dense type="info"
+            >以下のURLにカード画像をアップロードしました。 カードのご購入時、このURLを備考欄に入力してください。
+            <span class="breakword">{{ uploadURL }}</span>
+          </v-alert>
+          <v-spacer />
+          <v-btn @click="copyToClipboard(uploadURL)"> <v-icon class="ma-2">mdi-content-copy</v-icon>コピーする </v-btn>
         </v-card-text>
         <v-snackbar v-model="snackbar" type="success" :timeout="timeout"> コピーしました </v-snackbar>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn @click="closeUploadDialog" color="primary" icon><v-icon>mdi-close</v-icon></v-btn>
-          <v-spacer />
-        </v-card-actions>
       </v-card>
     </v-dialog>
   </div>
@@ -287,6 +282,9 @@
   max-width: 400px;
   min-height: 200px;
   text-align: center;
+}
+.breakword {
+  word-wrap: break-word;
 }
 </style>
 <script lang="ts">
@@ -487,7 +485,7 @@ export default class CardMaker extends Vue {
       })
       .then((blobRes) => {
         const href = window.location.href;
-        this.uploadURL = `${href}/copy/${cardID}`;
+        this.uploadURL = `${href}copy/${cardID}`;
         this.uploadDialog = true;
         return;
       });
@@ -497,6 +495,7 @@ export default class CardMaker extends Vue {
   private closeDialog() {
     this.dialog = false;
     this.dataURL = "";
+    this.closeUploadDialog();
   }
 
   private closeUploadDialog() {
