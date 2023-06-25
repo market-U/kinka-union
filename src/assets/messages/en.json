@@ -3,6 +3,7 @@
   "common": {
     "welcome_msg": "Welcome to {msg}",
     "close": "Close",
+    "cancel": "Cancel",
     "download_copy": "Download Copy",
     "issue": "Issue!",
     "show_copy": "Show Copy",
@@ -15,7 +16,8 @@
     "tweet": "Open Twitter"
   },
   "labels": {
-    "photo_section_title": "Face Photo Registration",
+    "photo_section_title": "Face Photo",
+    "input_profile": "Profile",
     "card_preview": "Card Preview",
     "division_name": "Branch",
     "member_name": "Member Name",
