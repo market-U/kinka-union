@@ -484,7 +484,10 @@ export default class CardMaker extends Vue {
         return blockBlobClient.uploadData(blob);
       })
       .then((blobRes) => {
-        const href = window.location.href;
+        let href = window.location.href;
+        if (!href.endsWith("/")) {
+          href = href.padEnd(href.length + 1, "/");
+        }
         this.uploadURL = `${href}copy/${cardID}`;
         this.uploadDialog = true;
         return;
