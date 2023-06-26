@@ -140,7 +140,6 @@
             <v-card-actions>
               <v-spacer />
               <v-btn @click="step = 1"><v-icon>mdi-undo</v-icon>{{ $t("common.back") }}</v-btn>
-              <!-- <v-btn @click="step = 3" text>next</v-btn> -->
               <v-btn
                 @click="
                   createCardImage(false);
@@ -170,7 +169,7 @@
       </v-stepper-content>
       <v-stepper-step step="3"> 発行 </v-stepper-step>
       <v-stepper-content step="3">
-        <v-card-title align="center">
+        <v-card-title align="center" class="text-subtitle-1 font-weight-bold">
           <v-spacer />
           <span v-if="forStaff">{{
             $t("messages.card_copy_issued", {
@@ -196,23 +195,31 @@
               <div class="text-body-2">
                 {{ $t("messages.share_image") }}
               </div>
-              <v-btn :href="tweetShareURL" target="_blank" icon><v-icon color="light-blue">mdi-twitter</v-icon></v-btn>
+              <v-card-actions>
+                <v-spacer />
+                <v-btn :href="tweetShareURL" target="_blank" small outlined rounded color="light-blue"
+                  ><v-icon color="light-blue">mdi-twitter</v-icon>ツイートする</v-btn
+                >
+              </v-card-actions>
             </v-alert>
           </v-col>
         </v-row>
         <v-card-actions>
           <v-spacer />
           <v-btn @click="step = 2"><v-icon>mdi-undo</v-icon>{{ $t("common.back") }}</v-btn>
-          <v-btn @click="dialog = true" color="primary">この画像でカードを申し込む</v-btn>
-
-          <v-spacer />
         </v-card-actions>
+        <v-card-title align="center" class="text-subtitle-1 font-weight-bold">
+          <span>{{ `＼カードご購入の方はこちら／` }}</span>
+        </v-card-title>
+        <v-btn @click="dialog = true" color="primary" rounded>
+          <v-icon>mdi-credit-card-fast</v-icon>この画像でカードを申し込む</v-btn
+        >
         <v-dialog v-model="dialog" :fullscreen="mobile">
           <v-card>
-            <v-system-bar height="36"
+            <v-system-bar height="36" fixed
               ><v-spacer /><v-btn @click="closeDialog" icon><v-icon>mdi-close</v-icon></v-btn>
             </v-system-bar>
-            <v-card-title><div>カード製作用データのアップロード</div> </v-card-title>
+            <v-card-title class="mt-8"><div>カード製作用データのアップロード</div> </v-card-title>
             <v-card-text class="text-body-1"
               >カードの製作を申し込む場合は、この画面からデータをアップロードしてください。</v-card-text
             >
@@ -221,7 +228,11 @@
             </v-card-text>
             <v-card-actions>
               <v-spacer />
-              <v-btn @click="uploadCardImage" color="primary" :disabled="uploadURL != '' || uploading"
+              <v-btn
+                @click="uploadCardImage"
+                color="primary"
+                :disabled="uploadURL != '' || uploading"
+                :loading="uploading"
                 ><v-icon>mdi-upload</v-icon>アップロード</v-btn
               >
               <v-spacer />
@@ -244,11 +255,6 @@
                   <v-spacer />
                 </v-card-actions>
               </div>
-            </v-card-text>
-            <v-card-text class="mt-6">
-              <v-row align="center" justify="center">
-                <v-progress-circular v-show="uploading" color="primary" indeterminate />
-              </v-row>
             </v-card-text>
           </v-card>
           <v-snackbar v-model="snackbar" type="success" :timeout="timeout"> コピーしました </v-snackbar>
