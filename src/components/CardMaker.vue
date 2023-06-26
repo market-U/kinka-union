@@ -209,7 +209,7 @@
         </v-card-actions>
         <v-dialog v-model="dialog" :fullscreen="mobile">
           <v-card>
-            <v-system-bar
+            <v-system-bar height="36"
               ><v-spacer /><v-btn @click="closeDialog" icon><v-icon>mdi-close</v-icon></v-btn>
             </v-system-bar>
             <v-card-title><div>カード製作用データのアップロード</div> </v-card-title>
@@ -221,13 +221,13 @@
             </v-card-text>
             <v-card-actions>
               <v-spacer />
-              <v-btn @click="uploadCardImage" color="primary" :disabled="uploadURL != ''"
+              <v-btn @click="uploadCardImage" color="primary" :disabled="uploadURL != '' || uploading"
                 ><v-icon>mdi-upload</v-icon>アップロード</v-btn
               >
               <v-spacer />
             </v-card-actions>
-            <v-divider class="mb-4" />
             <v-card-text v-show="uploadDialog">
+              <v-divider class="mb-4" />
               <div>
                 <v-alert type="info" color="primary" border="top" colored-border elevation="2">
                   <div>
@@ -245,6 +245,11 @@
                 </v-card-actions>
               </div>
             </v-card-text>
+            <v-card-text class="mt-6">
+              <v-row align="center" justify="center">
+                <v-progress-circular v-show="uploading" color="primary" indeterminate />
+              </v-row>
+            </v-card-text>
           </v-card>
           <v-snackbar v-model="snackbar" type="success" :timeout="timeout"> コピーしました </v-snackbar>
         </v-dialog>
@@ -254,63 +259,6 @@
     <v-overlay v-model="canvas">
       <v-progress-circular color="primary" indeterminate />
     </v-overlay>
-
-    <!-- issue dialog -->
-    <!-- <v-dialog v-model="dialog">
-      <v-card style="background-color: white">
-        <v-system-bar height="36">
-          <v-spacer />
-          <v-btn @click="closeDialog" icon><v-icon>mdi-close</v-icon></v-btn>
-        </v-system-bar>
-        <v-card-title align="center">
-          <v-spacer />
-          <span v-if="forStaff">{{
-            $t("messages.card_copy_issued", {
-              card: $t(`organization.${cardType.organization_type}.card_title`).toString().toLowerCase(),
-            })
-          }}</span>
-          <span v-else>
-            {{
-              $t("messages.card_issued", {
-                card: $t(`organization.${cardType.organization_type}.card`).toString().toLowerCase(),
-              })
-            }}
-          </span>
-          <v-spacer />
-        </v-card-title>
-        <v-card-text align="center">
-          <img :src="dataURL" style="max-width: min(90%, 720px)" />
-        </v-card-text>
-        <v-card-text align="center" v-if="false">
-          <img :src="cropedImg" style="max-width: min(90%, 720px)" />
-        </v-card-text>
-        <v-card-text>
-          <li>
-            <span>{{ $t("messages.save_image") }}</span>
-          </li>
-          <li>
-            <span> {{ $t("messages.share_image") }}</span>
-            <v-btn :href="tweetShareURL" target="_blank" icon><v-icon color="light-blue">mdi-twitter</v-icon></v-btn>
-          </li>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn @click="uploadCardImage" color="error" :disabled="uploadDialog"
-            ><v-icon>mdi-upload</v-icon>この画像でカードを申し込む</v-btn
-          >
-          <v-spacer />
-        </v-card-actions>
-        <v-card-text v-if="uploadDialog">
-          <v-alert dense type="info"
-            >以下のURLにカード画像をアップロードしました。 カードのご購入時、このURLを備考欄に入力してください。
-            <span class="breakword">{{ uploadURL }}</span>
-          </v-alert>
-          <v-spacer />
-          <v-btn @click="copyToClipboard(uploadURL)"> <v-icon class="ma-2">mdi-content-copy</v-icon>コピーする </v-btn>
-        </v-card-text>
-        <v-snackbar v-model="snackbar" type="success" :timeout="timeout"> コピーしました </v-snackbar>
-      </v-card>
-    </v-dialog> -->
   </div>
 </template>
 <style scoped>
@@ -450,6 +398,7 @@ export default class CardMaker extends Vue {
   private timeout = 2000;
   private uploadURL = "";
   private step = 1;
+  private uploading = false;
 
   created() {
     const staff = this.$route.query.staff;
@@ -579,26 +528,28 @@ export default class CardMaker extends Vue {
   }
 
   private async uploadCardImage() {
-    this.canvas = true;
+    this.uploading = true;
     Vue.nextTick(async () => {
       const preview: HTMLElement = this.$refs.cardPreview as HTMLElement;
       const params: Parameters<typeof html2canvas> = [preview, { scale: 1 }];
       const canvasElement = await html2canvas(...params).catch((e) => {
         console.error(e);
+        this.uploading = false;
         return;
       });
       if (!canvasElement) {
         console.error("canvasElement not found");
+        this.uploading = false;
         return;
       }
       canvasElement.toBlob((blob) => {
         if (blob) {
           this.uploadImgToBlobStorage(blob).finally(() => {
-            this.canvas = false;
+            this.uploading = false;
           });
         } else {
           console.error("blob from canvasElement not found");
-          this.canvas = false;
+          this.uploading = false;
         }
       });
     });
