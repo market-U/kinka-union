@@ -202,12 +202,20 @@
           </span>
           <v-spacer />
         </v-card-title>
-        <v-row align="center" no-gutters>
+        <v-row align="center" justify="center" no-gutters>
           <img :src="dataURL" style="max-width: min(100%, 720px)" />
         </v-row>
-        <v-row>
-          <v-col>
-            <v-alert border="left" class="mr-1 ml-1" colored-border color="primary" elevation="2">
+        <v-row align="center" justify="center">
+          <v-col align="center">
+            <v-alert
+              align="left"
+              border="left"
+              class="mr-1 ml-1"
+              colored-border
+              color="primary"
+              elevation="2"
+              max-width="720px"
+            >
               <div class="text-body-2">{{ $t("messages.save_image") }}</div>
               <div class="text-body-2">
                 {{ $t("messages.share_image") }}
@@ -238,7 +246,7 @@
           <v-spacer />
         </v-card-text>
         <v-spacer />
-        <v-dialog v-model="dialog" :fullscreen="mobile">
+        <v-dialog v-model="dialog" fullscreen>
           <v-card>
             <v-system-bar height="36" fixed
               ><v-spacer /><v-btn @click="closeDialog" icon><v-icon>mdi-close</v-icon></v-btn>
@@ -248,7 +256,9 @@
             </v-card-title>
             <v-card-text class="text-body-1">{{ $t("messages.upload_instruction") }}</v-card-text>
             <v-card-text>
-              <img :src="dataURL" style="max-width: min(100%, 720px)" />
+              <v-row justify="center">
+                <img :src="dataURL" style="max-width: min(100%, 720px)" />
+              </v-row>
             </v-card-text>
             <v-card-actions>
               <v-spacer />
@@ -264,13 +274,25 @@
             <v-card-text v-show="uploadDialog">
               <v-divider class="mb-4" />
               <div>
-                <v-alert type="info" color="primary" border="top" colored-border elevation="2">
-                  <div>
-                    {{ $t("messages.upload_complete") }}
-                  </div>
-                  <v-divider class="ma-2" />
-                  <div class="breakword text-body-2">{{ uploadURL }}</div>
-                </v-alert>
+                <v-row align="center" justify="center">
+                  <v-col align="center">
+                    <v-alert
+                      type="info"
+                      color="primary"
+                      border="left"
+                      colored-border
+                      elevation="2"
+                      max-width="720px"
+                      align="left"
+                    >
+                      <div>
+                        {{ $t("messages.upload_complete") }}
+                      </div>
+                      <v-divider class="ma-2" />
+                      <div class="breakword text-body-2">{{ uploadURL }}</div>
+                    </v-alert>
+                  </v-col>
+                </v-row>
                 <v-card-actions>
                   <v-spacer />
                   <v-btn @click="copyToClipboard(uploadURL)" color="primary">
@@ -578,7 +600,7 @@ export default class CardMaker extends Vue {
       canvasElement.toBlob((blob) => {
         if (blob) {
           this.uploadImgToBlobStorage(blob).finally(() => {
-            this.uploading = false;
+            // this.uploading = false;
           });
         } else {
           console.error("blob from canvasElement not found");
@@ -612,6 +634,9 @@ export default class CardMaker extends Vue {
         this.uploadURL = `${href}copy/${cardID}`;
         this.uploadDialog = true;
         return;
+      })
+      .finally(() => {
+        this.uploading = false;
       });
     return;
   }
