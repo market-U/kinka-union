@@ -3,6 +3,7 @@
   "common": {
     "welcome_msg": "Welcome to {msg}",
     "close": "Close",
+    "cancel": "Cancel",
     "download_copy": "Download Copy",
     "issue": "Issue!",
     "show_copy": "Show Copy",
@@ -12,23 +13,34 @@
     "next": "Next",
     "back": "Back",
     "attention": "ATTENTION",
-    "tweet": "Open Twitter"
+    "open_twitter": "Open Twitter",
+    "tweet": "tweet",
+    "upload": "upload"
   },
   "labels": {
-    "photo_section_title": "Face Photo Registration",
+    "photo_section_title": "Face Photo",
+    "input_profile": "Profile",
     "card_preview": "Card Preview",
     "division_name": "Branch",
     "member_name": "Member Name",
     "member_no": "{msg} No.",
-    "hide_bleed": "Hide the bleed"
+    "hide_bleed": "Hide the bleed",
+    "hide_division": "Hide Branch",
+    "apply_card": "apply a real card",
+    "upload_data": "Upload Card Image",
+    "copy_url": "Copy URL"
   },
   "messages": {
     "select_photo": "Select {member}'s photo.",
-    "card_issued": "Your {card} has been issued.",
+    "card_issued": "＼Your {card} has been issued.／",
     "card_copy_issued": "The copy of {card} has been created.",
     "save_image": "Save the image by pressing and holding the screen or right-clicking the mouse.",
     "share_image": "Attach your saved image and tweet it!",
-    "tweet_attention": "The image is not automatically attached to the tweet. Please save the image in advance and attach it to the tweet yourself."
+    "tweet_attention": "The image is not automatically attached to the tweet. Please save the image in advance and attach it to the tweet yourself.",
+    "for_purchase": "＼Click here to get a real card!／",
+    "upload_instruction": "To apply for a real card, please upload your card image data here.",
+    "upload_complete": "Your card image has been uploaded to the following url. Please give this url when you purchase your card.",
+    "copied": "Copied!"
   },
   "caption": {
     "division": "{msg} Branch"

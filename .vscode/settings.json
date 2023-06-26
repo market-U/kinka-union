@@ -1,0 +1,28 @@
+{
+	"[json]": {
+	  "editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"[typescript]": {
+	  "editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"eslint.validate": [
+		{
+		"language": "vue",
+		"autoFix": true
+		}
+	],
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"editor.formatOnSave": true,
+	"editor.formatOnPaste": true,
+	"editor.codeActionsOnSave": {
+    	"source.fixAll.eslint": true
+  	},
+	"editor.formatOnType": true,
+	"files.autoSave": "afterDelay",
+	"azureFunctions.deploySubpath": "api",
+	"azureFunctions.postDeployTask": "npm install (functions)",
+	"azureFunctions.projectLanguage": "TypeScript",
+	"azureFunctions.projectRuntime": "~4",
+	"debug.internalConsoleOptions": "neverOpen",
+	"azureFunctions.preDeployTask": "npm prune (functions)",
+}

@@ -1,17 +1,20 @@
 <template>
   <div>
-    <card-maker :cardType="type" />
+    <card-copy v-if="$route.params.id" :cardType="type" :cardId="$route.params.id" />
+    <card-maker v-else :cardType="type" />
   </div>
 </template>
 
 <script lang="ts">
 import CardMaker from "../components/CardMaker.vue";
+import CardCopy from "../components/CardCopy.vue";
 import { Component, Vue, Watch } from "vue-property-decorator";
 import { MODEL } from "@/module";
 
 @Component({
   components: {
     CardMaker,
+    CardCopy,
   },
 })
 export default class CardMakerView extends Vue {
@@ -23,15 +26,21 @@ export default class CardMakerView extends Vue {
   }
 
   created() {
-    this.setCardType(this.$route.path);
+    const cardId = this.$route.params.id;
+    console.log("card id:", cardId);
+    this.setCardType(this.getCardType());
   }
 
-  private setCardType(path: string) {
-    if (path === "/card/kinka") {
+  private getCardType(): string {
+    return this.$route.params.type;
+  }
+
+  private setCardType(type: string) {
+    if (type === "kinka") {
       this.type = MODEL.kinka;
-    } else if (path === "/card/buncho") {
+    } else if (type === "buncho") {
       this.type = MODEL.buncho;
-    } else if (path === "/card/hatchan") {
+    } else if (type === "hatchan") {
       this.type = MODEL.hatchan;
     } else {
       this.type = MODEL.kinka;
@@ -42,7 +51,7 @@ export default class CardMakerView extends Vue {
 
   @Watch("$route.path")
   onChangePath(path: string) {
-    this.setCardType(path);
+    this.setCardType(this.getCardType());
   }
 }
 </script>
