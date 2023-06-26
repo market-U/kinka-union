@@ -22,7 +22,8 @@
     "division_name": "支部名",
     "member_name": "おなまえ",
     "member_no": "{msg}No.",
-    "hide_bleed": "塗り足しを隠す"
+    "hide_bleed": "塗り足しを隠す",
+    "hide_division": "支部非表示"
   },
   "messages": {
     "select_photo": "{member}のお写真を選択してください",

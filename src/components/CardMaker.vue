@@ -6,7 +6,7 @@
       </v-stepper-step>
       <v-stepper-content step="1">
         <v-row no-gutters>
-          <v-col align="center" cols="12" md="6">
+          <v-col align="center" cols="12" md="12">
             <v-file-input
               v-model="file"
               filled
@@ -24,11 +24,11 @@
           </v-col>
         </v-row>
         <v-row no-gutters>
-          <v-col align="center" cols="12" md="6">
+          <v-col align="center" cols="12" md="12">
             <vue-cropper
               ref="cropper"
               class="ma-3 cropper"
-              :style="`background-color: ${cardType.colors.default_photo_bg};`"
+              :style="`background-color: ${cardType.colors.default_photo_bg}; filter: contrast(${imgContrast}%) brightness(${imgBrightness}%)`"
               :guides="true"
               :view-mode="2"
               drag-mode="crop"
@@ -44,7 +44,7 @@
               @cropend="cropImage"
             />
           </v-col>
-          <v-col class="pa-3" cols="12" md="6">
+          <v-col class="pa-3" cols="12" md="12">
             <div class="toolButtons" style="text-align: center">
               <v-btn @click="rotate(-90)" :disabled="!file" icon color="primary"
                 ><v-icon>mdi-file-rotate-left</v-icon></v-btn
@@ -52,14 +52,14 @@
               <v-btn @click="rotate(90)" :disabled="!file" icon color="primary"
                 ><v-icon>mdi-file-rotate-right</v-icon></v-btn
               >
-              <v-btn @click="move(-10, 0)" :disabled="!file" icon color="primary"
+              <!-- <v-btn @click="move(-10, 0)" :disabled="!file" icon color="primary"
                 ><v-icon>mdi-arrow-left</v-icon></v-btn
               >
               <v-btn @click="move(10, 0)" :disabled="!file" icon color="primary"
                 ><v-icon>mdi-arrow-right</v-icon></v-btn
               >
               <v-btn @click="move(0, -10)" :disabled="!file" icon color="primary"><v-icon>mdi-arrow-up</v-icon></v-btn>
-              <v-btn @click="move(0, 10)" :disabled="!file" icon color="primary"><v-icon>mdi-arrow-down</v-icon></v-btn>
+              <v-btn @click="move(0, 10)" :disabled="!file" icon color="primary"><v-icon>mdi-arrow-down</v-icon></v-btn> -->
               <v-btn @click="relativeZoom(0.1)" :disabled="!file" icon color="primary"
                 ><v-icon>mdi-magnify-plus</v-icon></v-btn
               >
@@ -69,6 +69,11 @@
               <v-btn @click="reset()" :disabled="!file" icon color="primary"><v-icon>mdi-undo-variant</v-icon></v-btn>
             </div>
           </v-col>
+        </v-row>
+        <v-row v-show="false" no-gutters>
+          明るさ<v-slider v-model="imgBrightness" step="1" min="25" max="200"></v-slider> </v-row
+        ><v-row v-show="false" no-gutters>
+          コントラスト<v-slider v-model="imgContrast" step="1" min="25" max="200"></v-slider>
         </v-row>
         <v-row no-gutters>
           <v-col>
@@ -108,10 +113,13 @@
                     })
                   }}
                 </div>
-                <div class="photoPreview"></div>
+                <div
+                  class="photoPreview"
+                  :style="`filter: contrast(${imgContrast}%) brightness(${imgBrightness}%)`"
+                ></div>
                 <div class="infoPreview pa-10" :style="`color: ${cardType.colors.card_info_font};`">
                   <v-card-title class="memberNo ma-2">{{ numberLabel }} {{ memberNo }}</v-card-title>
-                  <v-card-title class="division ma-2">{{ $t("caption.division", { msg: division }) }}</v-card-title>
+                  <v-card-title class="division ma-2">{{ divisionLabel }}</v-card-title>
                   <div class="memberName" :style="memberNameStyle">{{ memberName }}</div>
                 </div>
                 <v-img class="cardOverlay" :src="cardOverlay ? require(`../assets/${cardOverlay}`) : ''" />
@@ -125,7 +133,16 @@
           </v-col>
           <v-col>
             <v-text-field :label="numberLabel" v-model="memberNo" />
-            <v-text-field :label="$t('labels.division_name')" v-model="division" />
+            <div class="d-flex flex-column">
+              <v-text-field :label="$t('labels.division_name')" v-model="division" />
+              <div class="d-flex justify-end">
+                <v-checkbox v-model="hideDivision" style="margin-top: -20px; margin-bottom: -20px">
+                  <div slot="label">
+                    <div class="text-caption">支部を非表示にする</div>
+                  </div>
+                </v-checkbox>
+              </div>
+            </div>
             <v-text-field :label="$t('labels.member_name')" v-model="memberName" />
             <v-text-field
               v-if="forStaff"
@@ -209,11 +226,18 @@
           <v-btn @click="step = 2"><v-icon>mdi-undo</v-icon>{{ $t("common.back") }}</v-btn>
         </v-card-actions>
         <v-card-title align="center" class="text-subtitle-1 font-weight-bold">
+          <v-spacer />
           <span>{{ `＼カードご購入の方はこちら／` }}</span>
+          <v-spacer />
         </v-card-title>
-        <v-btn @click="dialog = true" color="primary" rounded>
-          <v-icon>mdi-credit-card-fast</v-icon>この画像でカードを申し込む</v-btn
-        >
+        <v-card-text align="center">
+          <v-spacer />
+          <v-btn @click="dialog = true" color="primary" rounded>
+            <v-icon>mdi-credit-card-fast</v-icon>この画像でカードを申し込む</v-btn
+          >
+          <v-spacer />
+        </v-card-text>
+        <v-spacer />
         <v-dialog v-model="dialog" :fullscreen="mobile">
           <v-card>
             <v-system-bar height="36" fixed
@@ -392,6 +416,7 @@ export default class CardMaker extends Vue {
   private file = null;
   private memberNo = "";
   private division = "";
+  private hideDivision = false;
   private memberName = "";
   private trim = false;
   private forStaff = false;
@@ -405,6 +430,8 @@ export default class CardMaker extends Vue {
   private uploadURL = "";
   private step = 1;
   private uploading = false;
+  private imgBrightness = 100;
+  private imgContrast = 100;
 
   created() {
     const staff = this.$route.query.staff;
@@ -624,11 +651,15 @@ export default class CardMaker extends Vue {
     return `#${"KinkaUnionCardMaker"}`;
   }
 
+  get divisionLabel(): string {
+    return this.hideDivision ? this.division : this.$t("caption.division", { msg: this.division }).toString();
+  }
+
   get shareText(): string {
     return encodeURIComponent(`${this.$t("common.welcome_msg", { msg: this.organizationName })}!!
 
 ${this.numberLabel} ${this.memberNo}
-${this.$t("caption.division", { msg: this.division })}
+${this.divisionLabel}
 ${this.memberName}
 
 ${this.orgNameHashTag}
