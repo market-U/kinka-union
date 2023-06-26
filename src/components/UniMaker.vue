@@ -257,7 +257,7 @@
                 <v-spacer />
                 <v-btn :href="tweetShareURL" target="_blank">
                   <v-icon color="light-blue">mdi-twitter</v-icon>
-                  {{ $t("common.tweet") }}
+                  {{ $t("common.open_twitter") }}
                 </v-btn>
               </v-card-actions>
             </v-card>
