@@ -125,11 +125,6 @@
                 <v-img class="cardOverlay" :src="cardOverlay ? require(`../assets/${cardOverlay}`) : ''" />
               </div>
             </div>
-            <v-row v-if="forStaff">
-              <v-spacer />
-              <v-checkbox v-model="trim" :label="$t('labels.hide_bleed')" row style="display: inline"></v-checkbox>
-              <v-spacer />
-            </v-row>
           </v-col>
           <v-col>
             <v-text-field :label="numberLabel" v-model="memberNo" />
@@ -144,12 +139,6 @@
               </div>
             </div>
             <v-text-field :label="$t('labels.member_name')" v-model="memberName" />
-            <v-text-field
-              v-if="forStaff"
-              :label="$t('common.dl_file_name')"
-              hint="指定しない場合は {組合員No.}_{支部名}_{おなまえ}.png となります。"
-              v-model="downloadFileName"
-            />
           </v-col>
         </v-row>
         <v-row>
@@ -164,21 +153,7 @@
                 "
                 :disabled="!filled"
                 color="primary"
-                v-if="forStaff"
-                ><v-icon class="mr-2">mdi-smart-card-outline</v-icon>{{ $t("common.show_copy") }}</v-btn
-              >
-              <v-btn
-                @click="
-                  createCardImage(false);
-                  step = 3;
-                "
-                :disabled="!filled"
-                color="primary"
-                v-else
                 ><v-icon class="mr-2">mdi-smart-card-outline</v-icon>{{ $t("common.issue") }}</v-btn
-              >
-              <v-btn @click="createCardImage(true)" :disabled="!filled" color="primary" v-if="forStaff"
-                ><v-icon>mdi-download</v-icon>{{ $t("common.download_copy") }}</v-btn
               >
             </v-card-actions>
           </v-col>
@@ -188,12 +163,7 @@
       <v-stepper-content step="3">
         <v-card-title align="center" class="text-subtitle-1 font-weight-bold">
           <v-spacer />
-          <span v-if="forStaff">{{
-            $t("messages.card_copy_issued", {
-              card: $t(`organization.${cardType.organization_type}.card_title`).toString().toLowerCase(),
-            })
-          }}</span>
-          <span v-else>
+          <span>
             {{
               $t("messages.card_issued", {
                 card: $t(`organization.${cardType.organization_type}.card`).toString().toLowerCase(),
@@ -451,7 +421,7 @@ export default class CardMaker extends Vue {
   private hideDivision = false;
   private memberName = "";
   private trim = false;
-  private forStaff = false;
+  // private forStaff = false;
   private downloadFileName = "";
   private dataURL = "";
   private dialog = false;
@@ -467,10 +437,10 @@ export default class CardMaker extends Vue {
   private shareLoading = false;
 
   created() {
-    const staff = this.$route.query.staff;
-    if (staff != null) {
-      this.forStaff = true;
-    }
+    // const staff = this.$route.query.staff;
+    // if (staff != null) {
+    //   this.forStaff = true;
+    // }
   }
 
   mounted() {
@@ -573,9 +543,7 @@ export default class CardMaker extends Vue {
   private async createCardImage(download: boolean) {
     this.canvas = true;
     Vue.nextTick(async () => {
-      const preview: HTMLElement = this.forStaff
-        ? (this.$refs.cardPreview as HTMLElement)
-        : (this.$refs.cardFrame as HTMLElement);
+      const preview: HTMLElement = this.$refs.cardFrame as HTMLElement;
       const params: Parameters<typeof html2canvas> = [preview, { scale: 1 }];
       const canvasElement = await html2canvas(...params).catch((e) => {
         console.error(e);
@@ -737,7 +705,7 @@ ${this.appNameHashTag}
     if (this.shareable) {
       this.shareLoading = true;
       Vue.nextTick(async () => {
-        const blob = await this.getCardBlob(false);
+        const blob = await this.getCardBlobFromDataURL(this.dataURL);
         this.shareLoading = false;
         if (blob) {
           navigator
