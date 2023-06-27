@@ -222,7 +222,7 @@
               </div>
               <v-card-actions>
                 <v-spacer />
-                <v-btn v-if="shareable" @click="shareCardImg()"
+                <v-btn v-if="shareable" @click="shareCardImg()" small outlined rounded color="light-blue" :loading="shareLoading"
                   ><v-icon color="light-blue">mdi-share</v-icon>シェア</v-btn
                 >
                 <v-btn v-else :href="tweetShareURL" target="_blank" small outlined rounded color="light-blue"
@@ -457,6 +457,7 @@ export default class CardMaker extends Vue {
   private uploading = false;
   private imgBrightness = 100;
   private imgContrast = 100;
+  private shareLoading = false;
 
   created() {
     const staff = this.$route.query.staff;
@@ -594,8 +595,14 @@ export default class CardMaker extends Vue {
     });
   }
 
-  private async getCardBlob(): Promise<Blob | null> {
-    const preview: HTMLElement = this.$refs.cardPreview as HTMLElement;
+  private async getCardBlobFromDataURL(dataUrl: string): Promise<Blob | null> {
+    return await (await fetch(dataUrl)).blob()
+  }
+
+  private async getCardBlob(copy: boolean): Promise<Blob | null> {
+    const preview: HTMLElement = copy
+      ? (this.$refs.cardPreview as HTMLElement)
+      : (this.$refs.cardFrame as HTMLElement);
     const params: Parameters<typeof html2canvas> = [preview, { scale: 1 }];
     const canvasElement = await html2canvas(...params).catch((e) => {
       console.error(e);
@@ -616,7 +623,7 @@ export default class CardMaker extends Vue {
   private async uploadCardImage() {
     this.uploading = true;
     Vue.nextTick(async () => {
-      this.getCardBlob().then((blob) => {
+      this.getCardBlob(true).then((blob) => {
         if (blob) {
           this.uploadImgToBlobStorage(blob).finally(() => {
             // this.uploading = false;
@@ -723,7 +730,9 @@ ${this.appNameHashTag}
 
   private async shareCardImg(): Promise<void> {
     if (this.shareable) {
-      const blob = await this.getCardBlob();
+      this.shareLoading = true;
+      const blob = await this.getCardBlob(false);
+      this.shareLoading = false;
       if (blob) {
         navigator
           .share({
