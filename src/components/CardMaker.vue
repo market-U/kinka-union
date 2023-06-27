@@ -222,7 +222,10 @@
               </div>
               <v-card-actions>
                 <v-spacer />
-                <v-btn :href="tweetShareURL" target="_blank" small outlined rounded color="light-blue"
+                <v-btn v-if="shareable" @click="shareCardImg()"
+                  ><v-icon color="light-blue">mdi-share</v-icon>シェア</v-btn
+                >
+                <v-btn v-else :href="tweetShareURL" target="_blank" small outlined rounded color="light-blue"
                   ><v-icon color="light-blue">mdi-twitter</v-icon>{{ $t("common.tweet") }}</v-btn
                 >
               </v-card-actions>
@@ -521,6 +524,15 @@ export default class CardMaker extends Vue {
       return Math.min((dispWidth - marginTortalm) / previewOriginalWidth, maxZoom);
     }
   }
+
+  get shareable(): boolean {
+    if (navigator.share !== undefined) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   private onChangeFileInput() {
     if (this.file == null) {
       this.cropper.destroy();
@@ -582,22 +594,29 @@ export default class CardMaker extends Vue {
     });
   }
 
+  private async getCardBlob(): Promise<Blob | null> {
+    const preview: HTMLElement = this.$refs.cardPreview as HTMLElement;
+    const params: Parameters<typeof html2canvas> = [preview, { scale: 1 }];
+    const canvasElement = await html2canvas(...params).catch((e) => {
+      console.error(e);
+      this.uploading = false;
+      return null;
+    });
+    if (!canvasElement) {
+      console.error("canvasElement not found");
+      return null;
+    }
+    return new Promise((resolve, reject) => {
+      canvasElement.toBlob((blob) => {
+        resolve(blob);
+      });
+    });
+  }
+
   private async uploadCardImage() {
     this.uploading = true;
     Vue.nextTick(async () => {
-      const preview: HTMLElement = this.$refs.cardPreview as HTMLElement;
-      const params: Parameters<typeof html2canvas> = [preview, { scale: 1 }];
-      const canvasElement = await html2canvas(...params).catch((e) => {
-        console.error(e);
-        this.uploading = false;
-        return;
-      });
-      if (!canvasElement) {
-        console.error("canvasElement not found");
-        this.uploading = false;
-        return;
-      }
-      canvasElement.toBlob((blob) => {
+      this.getCardBlob().then((blob) => {
         if (blob) {
           this.uploadImgToBlobStorage(blob).finally(() => {
             // this.uploading = false;
@@ -696,6 +715,30 @@ ${this.appNameHashTag}
     let url = `${location.protocol}//${location.host}${location.pathname}`;
     const shareURL = `https://twitter.com/intent/tweet?text=${this.shareText}&url=${url}`;
     return shareURL;
+  }
+
+  private async shareCardImg(): Promise<void> {
+    if (this.shareable) {
+      const blob = await this.getCardBlob();
+      if (blob) {
+        navigator
+          .share({
+            text: this.shareText,
+            url: `${location.protocol}//${location.host}${location.pathname}`,
+            files: [new File([blob], "card.png", { type: "image/png" })],
+          })
+          .then(() => {
+            console.log("Share was successful.");
+          })
+          .catch((error) => {
+            console.log("Sharing failed", error);
+          });
+      } else {
+        console.error("failed to get blob.");
+      }
+    } else {
+      console.error("navigation.share not supported.");
+    }
   }
 
   private copyToClipboard(text: string) {
