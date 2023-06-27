@@ -193,7 +193,7 @@
               <v-card-actions>
                 <v-spacer />
                 <v-btn
-                  v-if="shareable"
+                  v-if="canShare"
                   @click="shareCardImg()"
                   small
                   outlined
@@ -503,12 +503,8 @@ export default class CardMaker extends Vue {
     }
   }
 
-  get shareable(): boolean {
-    if (navigator.share !== undefined) {
-      return true;
-    } else {
-      return false;
-    }
+  get canShare(): boolean {
+    return navigator.share !== undefined ? true : false;
   }
 
   private onChangeFileInput() {
@@ -702,7 +698,7 @@ ${this.appNameHashTag}
   }
 
   private async shareCardImg(): Promise<void> {
-    if (this.shareable) {
+    if (this.canShare) {
       this.shareLoading = true;
       Vue.nextTick(async () => {
         const blob = await this.getCardBlobFromDataURL(this.dataURL);
@@ -710,8 +706,8 @@ ${this.appNameHashTag}
         if (blob) {
           navigator
             .share({
-              text: this.shareText,
-              url: `${location.protocol}//${location.host}${location.pathname}`,
+              text: `${this.shareText}
+${location.protocol}//${location.host}${location.pathname}`,
               files: [new File([blob], "card.png", { type: "image/png" })],
             })
             .then(() => {
