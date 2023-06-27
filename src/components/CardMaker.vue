@@ -700,7 +700,7 @@ export default class CardMaker extends Vue {
   }
 
   get shareText(): string {
-    return encodeURIComponent(`${this.$t("common.welcome_msg", { msg: this.organizationName })}!!
+    return `${this.$t("common.welcome_msg", { msg: this.organizationName })}!!
 
 ${this.numberLabel} ${this.memberNo}
 ${this.divisionLabel}
@@ -708,12 +708,16 @@ ${this.memberName}
 
 ${this.orgNameHashTag}
 ${this.appNameHashTag}
-`);
+`;
+  }
+
+  get shareTextEncoded(): string {
+    return encodeURIComponent(this.shareText);
   }
 
   get tweetShareURL(): string {
     let url = `${location.protocol}//${location.host}${location.pathname}`;
-    const shareURL = `https://twitter.com/intent/tweet?text=${this.shareText}&url=${url}`;
+    const shareURL = `https://twitter.com/intent/tweet?text=${this.shareTextEncoded}&url=${url}`;
     return shareURL;
   }
 
