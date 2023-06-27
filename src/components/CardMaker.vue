@@ -736,24 +736,26 @@ ${this.appNameHashTag}
   private async shareCardImg(): Promise<void> {
     if (this.shareable) {
       this.shareLoading = true;
-      const blob = await this.getCardBlob(false);
-      this.shareLoading = false;
-      if (blob) {
-        navigator
-          .share({
-            text: this.shareText,
-            url: `${location.protocol}//${location.host}${location.pathname}`,
-            files: [new File([blob], "card.png", { type: "image/png" })],
-          })
-          .then(() => {
-            console.log("Share was successful.");
-          })
-          .catch((error) => {
-            console.log("Sharing failed", error);
-          });
-      } else {
-        console.error("failed to get blob.");
-      }
+      Vue.nextTick(async () => {
+        const blob = await this.getCardBlob(false);
+        this.shareLoading = false;
+        if (blob) {
+          navigator
+            .share({
+              text: this.shareText,
+              url: `${location.protocol}//${location.host}${location.pathname}`,
+              files: [new File([blob], "card.png", { type: "image/png" })],
+            })
+            .then(() => {
+              console.log("Share was successful.");
+            })
+            .catch((error) => {
+              console.log("Sharing failed", error);
+            });
+        } else {
+          console.error("failed to get blob.");
+        }
+      });
     } else {
       console.error("navigation.share not supported.");
     }
