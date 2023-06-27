@@ -125,11 +125,6 @@
                 <v-img class="cardOverlay" :src="cardOverlay ? require(`../assets/${cardOverlay}`) : ''" />
               </div>
             </div>
-            <v-row v-if="forStaff">
-              <v-spacer />
-              <v-checkbox v-model="trim" :label="$t('labels.hide_bleed')" row style="display: inline"></v-checkbox>
-              <v-spacer />
-            </v-row>
           </v-col>
           <v-col>
             <v-text-field :label="numberLabel" v-model="memberNo" />
@@ -144,12 +139,6 @@
               </div>
             </div>
             <v-text-field :label="$t('labels.member_name')" v-model="memberName" />
-            <v-text-field
-              v-if="forStaff"
-              :label="$t('common.dl_file_name')"
-              hint="指定しない場合は {組合員No.}_{支部名}_{おなまえ}.png となります。"
-              v-model="downloadFileName"
-            />
           </v-col>
         </v-row>
         <v-row>
@@ -164,21 +153,7 @@
                 "
                 :disabled="!filled"
                 color="primary"
-                v-if="forStaff"
-                ><v-icon class="mr-2">mdi-smart-card-outline</v-icon>{{ $t("common.show_copy") }}</v-btn
-              >
-              <v-btn
-                @click="
-                  createCardImage(false);
-                  step = 3;
-                "
-                :disabled="!filled"
-                color="primary"
-                v-else
                 ><v-icon class="mr-2">mdi-smart-card-outline</v-icon>{{ $t("common.issue") }}</v-btn
-              >
-              <v-btn @click="createCardImage(true)" :disabled="!filled" color="primary" v-if="forStaff"
-                ><v-icon>mdi-download</v-icon>{{ $t("common.download_copy") }}</v-btn
               >
             </v-card-actions>
           </v-col>
@@ -188,12 +163,7 @@
       <v-stepper-content step="3">
         <v-card-title align="center" class="text-subtitle-1 font-weight-bold">
           <v-spacer />
-          <span v-if="forStaff">{{
-            $t("messages.card_copy_issued", {
-              card: $t(`organization.${cardType.organization_type}.card_title`).toString().toLowerCase(),
-            })
-          }}</span>
-          <span v-else>
+          <span>
             {{
               $t("messages.card_issued", {
                 card: $t(`organization.${cardType.organization_type}.card`).toString().toLowerCase(),
@@ -222,7 +192,17 @@
               </div>
               <v-card-actions>
                 <v-spacer />
-                <v-btn :href="tweetShareURL" target="_blank" small outlined rounded color="light-blue"
+                <v-btn
+                  v-if="shareable"
+                  @click="shareCardImg()"
+                  small
+                  outlined
+                  rounded
+                  color="light-blue"
+                  :loading="shareLoading"
+                  ><v-icon color="light-blue">mdi-share</v-icon>シェア</v-btn
+                >
+                <v-btn v-else :href="tweetShareURL" target="_blank" small outlined rounded color="light-blue"
                   ><v-icon color="light-blue">mdi-twitter</v-icon>{{ $t("common.tweet") }}</v-btn
                 >
               </v-card-actions>
@@ -441,7 +421,7 @@ export default class CardMaker extends Vue {
   private hideDivision = false;
   private memberName = "";
   private trim = false;
-  private forStaff = false;
+  // private forStaff = false;
   private downloadFileName = "";
   private dataURL = "";
   private dialog = false;
@@ -454,12 +434,13 @@ export default class CardMaker extends Vue {
   private uploading = false;
   private imgBrightness = 100;
   private imgContrast = 100;
+  private shareLoading = false;
 
   created() {
-    const staff = this.$route.query.staff;
-    if (staff != null) {
-      this.forStaff = true;
-    }
+    // const staff = this.$route.query.staff;
+    // if (staff != null) {
+    //   this.forStaff = true;
+    // }
   }
 
   mounted() {
@@ -521,6 +502,15 @@ export default class CardMaker extends Vue {
       return Math.min((dispWidth - marginTortalm) / previewOriginalWidth, maxZoom);
     }
   }
+
+  get shareable(): boolean {
+    if (navigator.share !== undefined) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   private onChangeFileInput() {
     if (this.file == null) {
       this.cropper.destroy();
@@ -553,9 +543,7 @@ export default class CardMaker extends Vue {
   private async createCardImage(download: boolean) {
     this.canvas = true;
     Vue.nextTick(async () => {
-      const preview: HTMLElement = this.forStaff
-        ? (this.$refs.cardPreview as HTMLElement)
-        : (this.$refs.cardFrame as HTMLElement);
+      const preview: HTMLElement = this.$refs.cardFrame as HTMLElement;
       const params: Parameters<typeof html2canvas> = [preview, { scale: 1 }];
       const canvasElement = await html2canvas(...params).catch((e) => {
         console.error(e);
@@ -582,22 +570,33 @@ export default class CardMaker extends Vue {
     });
   }
 
+  private async getCardBlobFromDataURL(dataUrl: string): Promise<Blob | null> {
+    return await (await fetch(dataUrl)).blob();
+  }
+
+  private async getCardBlob(copy: boolean): Promise<Blob | null> {
+    const preview: HTMLElement = copy ? (this.$refs.cardPreview as HTMLElement) : (this.$refs.cardFrame as HTMLElement);
+    const params: Parameters<typeof html2canvas> = [preview, { scale: 1 }];
+    const canvasElement = await html2canvas(...params).catch((e) => {
+      console.error(e);
+      this.uploading = false;
+      return null;
+    });
+    if (!canvasElement) {
+      console.error("canvasElement not found");
+      return null;
+    }
+    return new Promise((resolve, reject) => {
+      canvasElement.toBlob((blob) => {
+        resolve(blob);
+      });
+    });
+  }
+
   private async uploadCardImage() {
     this.uploading = true;
     Vue.nextTick(async () => {
-      const preview: HTMLElement = this.$refs.cardPreview as HTMLElement;
-      const params: Parameters<typeof html2canvas> = [preview, { scale: 1 }];
-      const canvasElement = await html2canvas(...params).catch((e) => {
-        console.error(e);
-        this.uploading = false;
-        return;
-      });
-      if (!canvasElement) {
-        console.error("canvasElement not found");
-        this.uploading = false;
-        return;
-      }
-      canvasElement.toBlob((blob) => {
+      this.getCardBlob(true).then((blob) => {
         if (blob) {
           this.uploadImgToBlobStorage(blob).finally(() => {
             // this.uploading = false;
@@ -681,7 +680,7 @@ export default class CardMaker extends Vue {
   }
 
   get shareText(): string {
-    return encodeURIComponent(`${this.$t("common.welcome_msg", { msg: this.organizationName })}!!
+    return `${this.$t("common.welcome_msg", { msg: this.organizationName })}!!
 
 ${this.numberLabel} ${this.memberNo}
 ${this.divisionLabel}
@@ -689,13 +688,45 @@ ${this.memberName}
 
 ${this.orgNameHashTag}
 ${this.appNameHashTag}
-`);
+`;
+  }
+
+  get shareTextEncoded(): string {
+    return encodeURIComponent(this.shareText);
   }
 
   get tweetShareURL(): string {
     let url = `${location.protocol}//${location.host}${location.pathname}`;
-    const shareURL = `https://twitter.com/intent/tweet?text=${this.shareText}&url=${url}`;
+    const shareURL = `https://twitter.com/intent/tweet?text=${this.shareTextEncoded}&url=${url}`;
     return shareURL;
+  }
+
+  private async shareCardImg(): Promise<void> {
+    if (this.shareable) {
+      this.shareLoading = true;
+      Vue.nextTick(async () => {
+        const blob = await this.getCardBlobFromDataURL(this.dataURL);
+        this.shareLoading = false;
+        if (blob) {
+          navigator
+            .share({
+              text: this.shareText,
+              url: `${location.protocol}//${location.host}${location.pathname}`,
+              files: [new File([blob], "card.png", { type: "image/png" })],
+            })
+            .then(() => {
+              console.log("Share was successful.");
+            })
+            .catch((error) => {
+              console.log("Sharing failed", error);
+            });
+        } else {
+          console.error("failed to get blob.");
+        }
+      });
+    } else {
+      console.error("navigation.share not supported.");
+    }
   }
 
   private copyToClipboard(text: string) {
