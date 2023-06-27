@@ -222,7 +222,14 @@
               </div>
               <v-card-actions>
                 <v-spacer />
-                <v-btn v-if="shareable" @click="shareCardImg()" small outlined rounded color="light-blue" :loading="shareLoading"
+                <v-btn
+                  v-if="shareable"
+                  @click="shareCardImg()"
+                  small
+                  outlined
+                  rounded
+                  color="light-blue"
+                  :loading="shareLoading"
                   ><v-icon color="light-blue">mdi-share</v-icon>シェア</v-btn
                 >
                 <v-btn v-else :href="tweetShareURL" target="_blank" small outlined rounded color="light-blue"
@@ -596,13 +603,11 @@ export default class CardMaker extends Vue {
   }
 
   private async getCardBlobFromDataURL(dataUrl: string): Promise<Blob | null> {
-    return await (await fetch(dataUrl)).blob()
+    return await (await fetch(dataUrl)).blob();
   }
 
   private async getCardBlob(copy: boolean): Promise<Blob | null> {
-    const preview: HTMLElement = copy
-      ? (this.$refs.cardPreview as HTMLElement)
-      : (this.$refs.cardFrame as HTMLElement);
+    const preview: HTMLElement = copy ? (this.$refs.cardPreview as HTMLElement) : (this.$refs.cardFrame as HTMLElement);
     const params: Parameters<typeof html2canvas> = [preview, { scale: 1 }];
     const canvasElement = await html2canvas(...params).catch((e) => {
       console.error(e);
