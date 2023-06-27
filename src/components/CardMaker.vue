@@ -504,7 +504,7 @@ export default class CardMaker extends Vue {
   }
 
   get canShare(): boolean {
-    return navigator.canShare();
+    return navigator.share !== undefined ? true : false;
   }
 
   private onChangeFileInput() {
