@@ -41,7 +41,8 @@
     "for_purchase": "＼Click here to get a real card!／",
     "upload_instruction": "To apply for a real card, please upload your card image data here.",
     "upload_complete": "Your card image has been uploaded to the following url. Please give this url to the store owner after you purchase the card.",
-    "copied": "Copied!"
+    "copied": "Copied!",
+    "location_moved": "This application has been moved to the following address."
   },
   "caption": {
     "division": "{msg} Branch"

@@ -41,7 +41,8 @@
     "for_purchase": "＼カードご購入の方はこちら／",
     "upload_instruction": "カードの製作を申し込む場合は、この画面からデータをアップロードしてください。",
     "upload_complete": "以下のURLにカード画像をアップロードしました。 販売サイトでのご購入後、このURLをショップオーナーにお知らせください。",
-    "copied": "コピーしました"
+    "copied": "コピーしました",
+    "location_moved": "このアプリは下記のアドレスに移動しました！"
   },
   "caption": {
     "division": "{msg}支部"
