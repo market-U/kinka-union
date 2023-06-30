@@ -28,7 +28,8 @@
     "hide_division": "Hide Branch",
     "apply_card": "apply a real card",
     "upload_data": "Upload Card Image",
-    "copy_url": "Copy URL"
+    "copy_url": "Copy URL",
+    "store_link": "Go to Sales Website"
   },
   "messages": {
     "select_photo": "Select {member}'s photo.",
@@ -39,7 +40,7 @@
     "tweet_attention": "The image is not automatically attached to the tweet. Please save the image in advance and attach it to the tweet yourself.",
     "for_purchase": "＼Click here to get a real card!／",
     "upload_instruction": "To apply for a real card, please upload your card image data here.",
-    "upload_complete": "Your card image has been uploaded to the following url. Please give this url when you purchase your card.",
+    "upload_complete": "Your card image has been uploaded to the following url. Please give this url to the store owner after you purchase the card.",
     "copied": "Copied!"
   },
   "caption": {

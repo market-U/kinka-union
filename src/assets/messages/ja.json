@@ -28,7 +28,8 @@
     "hide_division": "支部を非表示にする",
     "apply_card": "この画像でカードを申し込む",
     "upload_data": "カード製作用データのアップロード",
-    "copy_url": "URLをコピーする"
+    "copy_url": "URLをコピーする",
+    "store_link": "販売サイトはこちら"
   },
   "messages": {
     "select_photo": "{member}のお写真を選択してください",
@@ -39,7 +40,7 @@
     "tweet_attention": "ツイートに画像は自動的に添付されません。画像は事前に保存していただき、ご自身でツイートに添付してください。",
     "for_purchase": "＼カードご購入の方はこちら／",
     "upload_instruction": "カードの製作を申し込む場合は、この画面からデータをアップロードしてください。",
-    "upload_complete": "以下のURLにカード画像をアップロードしました。 カードのご購入時、このURLを備考欄に入力してください。",
+    "upload_complete": "以下のURLにカード画像をアップロードしました。 販売サイトでのご購入後、このURLをショップオーナーにお知らせください。",
     "copied": "コピーしました"
   },
   "caption": {
