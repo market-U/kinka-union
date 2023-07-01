@@ -242,9 +242,22 @@
         </v-card-text>
         <v-card-text align="center">
           {{ $t("messages.share_image") }}
+          <v-btn
+            v-if="canShare"
+            @click="shareCardImg()"
+            small
+            outlined
+            rounded
+            color="light-blue"
+            :loading="shareLoading"
+            ><v-icon color="light-blue">mdi-share</v-icon>{{ $t("common.share") }}</v-btn
+          >
+          <v-btn v-else :href="tweetShareURL" target="_blank" small outlined rounded color="light-blue"
+            ><v-icon color="light-blue">mdi-twitter</v-icon>{{ $t("common.tweet") }}</v-btn
+          >
           <v-dialog v-model="tweetDialog" width="500">
             <template v-slot:activator="{ on, attrs }">
-              <v-btn icon v-bind="attrs" v-on="on">
+              <v-btn v-show="false" icon v-bind="attrs" v-on="on">
                 <v-icon color="light-blue">mdi-twitter</v-icon>
               </v-btn>
             </template>
@@ -423,6 +436,7 @@ export default class CardMaker extends Vue {
   private dataURL = "";
   private dialog = false;
   private tweetDialog = false;
+  private shareLoading = false;
   private canvas = false;
   // private play = false;
   private plays = null;
@@ -686,6 +700,10 @@ export default class CardMaker extends Vue {
     }
   }
 
+  get canShare(): boolean {
+    return navigator.share !== undefined ? true : false;
+  }
+
   private cropImage() {
     // get image data for post processing, e.g. upload or setting image src
     if (this.file !== null) {
@@ -903,17 +921,53 @@ export default class CardMaker extends Vue {
     return `#${this.$t("uni_maker.app_name", "ja")} #${this.$t("uni_maker.app_name", "en")}`;
   }
 
+  get shareTextEncoded(): string {
+    return encodeURIComponent(this.shareText);
+  }
+
   get shareText(): string {
-    return encodeURIComponent(`${this.$t("uni_maker.msg_created")}
+    return `${this.$t("uni_maker.msg_created")}
 
 ${this.orgNameHashTag}
-`);
+`;
   }
 
   get tweetShareURL(): string {
     let url = `${location.protocol}//${location.host}${location.pathname}`;
-    const shareURL = `https://twitter.com/intent/tweet?text=${this.shareText}&url=${url}`;
+    const shareURL = `https://twitter.com/intent/tweet?text=${this.shareTextEncoded}&url=${url}`;
     return shareURL;
+  }
+
+  private async getCardBlobFromDataURL(dataUrl: string): Promise<Blob | null> {
+    return await (await fetch(dataUrl)).blob();
+  }
+
+  private async shareCardImg(): Promise<void> {
+    if (this.canShare) {
+      this.shareLoading = true;
+      Vue.nextTick(async () => {
+        const blob = await this.getCardBlobFromDataURL(this.dataURL);
+        this.shareLoading = false;
+        if (blob) {
+          navigator
+            .share({
+              text: `${this.shareText}
+${location.protocol}//${location.host}${location.pathname}`,
+              files: [new File([blob], "card.png", { type: "image/png" })],
+            })
+            .then(() => {
+              console.log("Share was successful.");
+            })
+            .catch((error) => {
+              console.log("Sharing failed", error);
+            });
+        } else {
+          console.error("failed to get blob.");
+        }
+      });
+    } else {
+      console.error("navigation.share not supported.");
+    }
   }
 }
 interface Pos {
