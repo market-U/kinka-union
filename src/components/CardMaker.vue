@@ -200,7 +200,7 @@
                   rounded
                   color="light-blue"
                   :loading="shareLoading"
-                  ><v-icon color="light-blue">mdi-share</v-icon>シェア</v-btn
+                  ><v-icon color="light-blue">mdi-share</v-icon>{{ $t("common.share") }}</v-btn
                 >
                 <v-btn v-else :href="tweetShareURL" target="_blank" small outlined rounded color="light-blue"
                   ><v-icon color="light-blue">mdi-twitter</v-icon>{{ $t("common.tweet") }}</v-btn

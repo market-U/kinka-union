@@ -15,7 +15,8 @@
     "attention": "ATTENTION",
     "open_twitter": "Twitterを開く",
     "tweet": "ツイートする",
-    "upload": "アップロード"
+    "upload": "アップロード",
+    "share": "シェア"
   },
   "labels": {
     "photo_section_title": "お写真選択",
