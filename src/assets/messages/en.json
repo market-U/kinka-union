@@ -15,7 +15,8 @@
     "attention": "ATTENTION",
     "open_twitter": "Open Twitter",
     "tweet": "tweet",
-    "upload": "upload"
+    "upload": "upload",
+    "share": "share"
   },
   "labels": {
     "photo_section_title": "Face Photo",
