@@ -52,14 +52,14 @@
               <v-btn @click="rotate(90)" :disabled="!file" icon color="primary"
                 ><v-icon>mdi-file-rotate-right</v-icon></v-btn
               >
-              <!-- <v-btn @click="move(-10, 0)" :disabled="!file" icon color="primary"
+              <v-btn @click="move(-10, 0)" :disabled="!file" icon color="primary"
                 ><v-icon>mdi-arrow-left</v-icon></v-btn
               >
               <v-btn @click="move(10, 0)" :disabled="!file" icon color="primary"
                 ><v-icon>mdi-arrow-right</v-icon></v-btn
               >
               <v-btn @click="move(0, -10)" :disabled="!file" icon color="primary"><v-icon>mdi-arrow-up</v-icon></v-btn>
-              <v-btn @click="move(0, 10)" :disabled="!file" icon color="primary"><v-icon>mdi-arrow-down</v-icon></v-btn> -->
+              <v-btn @click="move(0, 10)" :disabled="!file" icon color="primary"><v-icon>mdi-arrow-down</v-icon></v-btn>
               <v-btn @click="relativeZoom(0.1)" :disabled="!file" icon color="primary"
                 ><v-icon>mdi-magnify-plus</v-icon></v-btn
               >
@@ -122,7 +122,7 @@
                   <v-card-title class="division ma-2">{{ divisionLabel }}</v-card-title>
                   <div class="memberName" :style="memberNameStyle">{{ memberName }}</div>
                 </div>
-                <v-img class="cardOverlay" :src="cardOverlay ? require(`../assets/${cardOverlay}`) : ''" />
+                <v-img class="cardOverlay" ref="overlayImg" v-show="cardOverlay" :src="overlayImgSrc" />
               </div>
             </div>
           </v-col>
@@ -412,6 +412,7 @@ import { BlockBlobClient, AnonymousCredential } from "@azure/storage-blob";
 import VueCropper from "vue-cropperjs";
 import html2canvas from "html2canvas";
 import "cropperjs/dist/cropper.css";
+import { NavigationGuardNext, Route } from "vue-router";
 
 @Component({
   components: {
@@ -421,6 +422,7 @@ import "cropperjs/dist/cropper.css";
 export default class CardMaker extends Vue {
   @Prop({ required: true }) cardType?: MODEL.CardType;
   private imgSrc = ref();
+  private overlayImgSrc? = ref();
   private cropedImg?: string | ArrayBuffer | null = "";
   private file = null;
   private memberNo = "";
@@ -451,12 +453,29 @@ export default class CardMaker extends Vue {
   }
 
   mounted() {
-    this.imgSrc = require(`@/assets/${this.cardType?.assets.default_photo}`);
+    this.setUpImgSrc();
+  }
+
+  @Watch("step")
+  onChangeStep(step: number, stepBefore: number) {
+    if (stepBefore >= 3 && step < 3) {
+      this.resetImageData();
+    }
   }
 
   @Watch("cardType")
   onChangeCardType() {
+    this.setUpImgSrc();
+    this.step = 2;
+  }
+
+  private setUpImgSrc() {
     this.imgSrc = require(`@/assets/${this.cardType?.assets.default_photo}`);
+    if (this.cardOverlay) {
+      this.overlayImgSrc = require(`@/assets/${this.cardOverlay}`);
+    } else {
+      this.overlayImgSrc = undefined;
+    }
   }
 
   private get cropper() {
@@ -644,6 +663,7 @@ export default class CardMaker extends Vue {
   }
 
   private resetImageData() {
+    console.debug("resetImageData");
     this.dataURL = "";
     this.uploadURL = "";
   }
