@@ -120,9 +120,7 @@
                             <v-menu bottom offset-y>
                               <template v-slot:activator="{ on, attrs }">
                                 <v-card tile v-bind="attrs" v-on="on" :color="uniProp.lineColor.hex" height="100%">
-                                  <v-content class="fill-height ma-0" align="center" justify="center">
-                                    <v-icon :color="uniProp.lineColor.hex">mdi-square</v-icon>
-                                  </v-content>
+                                  <v-spacer />
                                 </v-card>
                               </template>
                               <v-card :width="dispWidth" class="pa-3">
