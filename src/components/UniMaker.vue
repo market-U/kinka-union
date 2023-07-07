@@ -99,47 +99,68 @@
             <v-col cols="12" md="6">
               <v-row no-gutters justify="center" align-content="center">
                 <v-card-text>{{ $t("uni_maker.msg_tap_uni_position") }}</v-card-text>
-                <v-btn-toggle v-model="uniBG" mandatory color="primary" :label="$t('uni_maker.background')">
-                  <v-btn><v-icon :color="uniProp.lineColor.hex">mdi-square</v-icon></v-btn>
-                  <v-btn v-for="asset in uniBGAssets" :key="asset.name">
-                    <v-img :src="require(`@/assets/${asset.path}`)" width="40"></v-img>
-                  </v-btn>
-                </v-btn-toggle>
               </v-row>
               <v-toolbar class="ma-0" elevation="0">
                 <template>
-                  <v-menu bottom offset-y>
+                  <v-bottom-sheet v-model="sheet_bg">
                     <template v-slot:activator="{ on, attrs }">
                       <v-btn dense v-bind="attrs" v-on="on" icon color="primary">
-                        <v-icon>mdi-palette</v-icon>
+                        <v-icon>mdi-image</v-icon>
                       </v-btn>
                     </template>
                     <v-card :width="dispWidth" class="pa-3">
                       <v-card-title
-                        >{{ $t("uni_maker.color") }}<v-spacer /><v-btn icon
-                          ><v-icon>mdi-close</v-icon></v-btn
+                        >{{ $t("uni_maker.background") }}<v-spacer /><v-btn icon
+                          ><v-icon @click="sheet_bg = false">mdi-close</v-icon></v-btn
                         ></v-card-title
                       >
-                      <v-color-picker
-                        v-model="uniProp.lineColor"
-                        dot-size="25"
-                        swatches-max-height="140"
-                        mode="hexa"
-                        show-swatches
-                        hide-sliders
-                        hide-canvas
-                        hide-inputs
-                      >
-                      </v-color-picker>
+                      <v-card-text>
+                        <v-row class="fill-height">
+                          <v-col cols="4">
+                            <v-menu bottom offset-y>
+                              <template v-slot:activator="{ on, attrs }">
+                                <v-card tile v-bind="attrs" v-on="on" :color="uniProp.lineColor.hex">
+                                  <v-content class="fill-height ma-0" align="center" justify="center">
+                                    <v-icon :color="uniProp.lineColor.hex">mdi-square</v-icon>
+                                  </v-content>
+                                </v-card>
+                              </template>
+                              <v-card :width="dispWidth" class="pa-3">
+                                <v-card-title
+                                  >{{ $t("uni_maker.color") }}<v-spacer /><v-btn icon
+                                    ><v-icon>mdi-close</v-icon></v-btn
+                                  ></v-card-title
+                                >
+                                <v-color-picker
+                                  v-model="uniProp.lineColor"
+                                  dot-size="25"
+                                  swatches-max-height="140"
+                                  mode="hexa"
+                                  show-swatches
+                                  hide-sliders
+                                  hide-canvas
+                                  hide-inputs
+                                >
+                                </v-color-picker>
+                              </v-card>
+                            </v-menu>
+                          </v-col>
+                          <v-col cols="4" v-for="(asset, index) in uniBGAssets" :key="asset.name">
+                            <v-card @click="uniBG = index + 1" tile>
+                              <v-img :src="require(`@/assets/${asset.path}`)" aspect-ratio="1"></v-img>
+                            </v-card>
+                          </v-col>
+                        </v-row>
+                      </v-card-text>
                     </v-card>
-                  </v-menu>
-                  <v-menu bottom offset-y>
+                  </v-bottom-sheet>
+                  <v-bottom-sheet v-model="sheet_shape">
                     <template v-slot:activator="{ on, attrs }">
                       <v-btn v-bind="attrs" v-on="on" icon color="primary"><v-icon>mdi-octagram</v-icon></v-btn>
                     </template>
                     <v-card :width="dispWidth" class="pa-3">
                       <v-card-title
-                        >{{ $t("uni_maker.shape") }}<v-spacer /><v-btn icon
+                        >{{ $t("uni_maker.shape") }}<v-spacer /><v-btn icon @click="sheet_shape = false"
                           ><v-icon>mdi-close</v-icon></v-btn
                         ></v-card-title
                       >
@@ -170,14 +191,14 @@
                         max="100"
                       ></v-slider>
                     </v-card>
-                  </v-menu>
-                  <v-menu bottom offset-y>
+                  </v-bottom-sheet>
+                  <v-bottom-sheet>
                     <template v-slot:activator="{ on, attrs }">
                       <v-btn v-bind="attrs" v-on="on" icon color="primary"><v-icon>mdi-cog</v-icon></v-btn>
                     </template>
                     <v-card :width="dispWidth" class="pa-3">
                       <v-card-title>
-                        {{ $t("uni_maker.other_settings") }}<v-spacer /><v-btn icon
+                        {{ $t("uni_maker.other_settings") }}<v-spacer /><v-btn icon @click="sheet_settings = false"
                           ><v-icon>mdi-close</v-icon></v-btn
                         ></v-card-title
                       >
@@ -194,7 +215,7 @@
                         max="500"
                       ></v-slider>
                     </v-card>
-                  </v-menu>
+                  </v-bottom-sheet>
                   <v-btn @click="onChangeUniProp(uniProp, uniProp)" icon color="primary">
                     <v-icon>mdi-reload</v-icon>
                   </v-btn>
@@ -439,6 +460,9 @@ export default class CardMaker extends Vue {
   private shareLoading = false;
   private canvas = false;
   // private play = false;
+  private sheet_bg = false;
+  private sheet_shape = false;
+  private sheet_settings = false;
   private plays = null;
   private playFrameMS = 100;
   private issueImageScale = 1;
@@ -458,6 +482,10 @@ export default class CardMaker extends Vue {
     {
       name: "battle",
       path: "uniBG05.png",
+    },
+    {
+      name: "milkyway",
+      path: "uniBG06.png",
     },
   ];
   private overlayImgList: HTMLImageElement[] = [];
