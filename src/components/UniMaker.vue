@@ -114,13 +114,25 @@
                           ><v-icon @click="sheet_bg = false">mdi-close</v-icon></v-btn
                         ></v-card-title
                       >
-                      <v-card-text>
+                      <v-card-text class="bottomSheet">
                         <v-row class="fill-height">
                           <v-col cols="4">
                             <v-menu bottom offset-y>
                               <template v-slot:activator="{ on, attrs }">
-                                <v-card tile v-bind="attrs" v-on="on" :color="uniProp.lineColor.hex" height="100%">
-                                  <v-spacer />
+                                <v-card
+                                  tile
+                                  v-bind="attrs"
+                                  v-on="on"
+                                  :color="uniProp.lineColor.hex"
+                                  height="100%"
+                                  @click="uniBG = 0"
+                                  style="position: relative"
+                                >
+                                  <v-icon
+                                    :color="getInvertedColor()"
+                                    style="position: absolute; right: 5px; bottom: 3px"
+                                    >mdi-palette</v-icon
+                                  >
                                 </v-card>
                               </template>
                               <v-card :width="dispWidth" class="pa-3">
@@ -144,7 +156,13 @@
                             </v-menu>
                           </v-col>
                           <v-col cols="4" v-for="(asset, index) in uniBGAssets" :key="asset.name">
-                            <v-card @click="uniBG = index + 1" tile>
+                            <v-card
+                              @click="
+                                uniBG = index + 1;
+                                sheet_bg = false;
+                              "
+                              tile
+                            >
                               <v-img :src="require(`@/assets/${asset.path}`)" aspect-ratio="1"></v-img>
                             </v-card>
                           </v-col>
@@ -190,7 +208,7 @@
                       ></v-slider>
                     </v-card>
                   </v-bottom-sheet>
-                  <v-bottom-sheet>
+                  <v-bottom-sheet v-model="sheet_settings">
                     <template v-slot:activator="{ on, attrs }">
                       <v-btn v-bind="attrs" v-on="on" icon color="primary"><v-icon>mdi-cog</v-icon></v-btn>
                     </template>
@@ -422,6 +440,10 @@
   min-height: 200px;
   text-align: center;
 }
+.bottomSheet {
+  max-height: 60vh;
+  overflow: scroll;
+}
 @media only screen and (max-width: 959px) {
   .v-stepper:not(.v-stepper--vertical) .v-stepper__label {
     display: flex !important;
@@ -484,6 +506,34 @@ export default class CardMaker extends Vue {
     {
       name: "milkyway",
       path: "uniBG06.png",
+    },
+    {
+      name: "bluesky",
+      path: "naru01.jpg",
+    },
+    {
+      name: "sunset",
+      path: "naru02.jpg",
+    },
+    {
+      name: "strawberry",
+      path: "naru03.jpg",
+    },
+    {
+      name: "fullmoon",
+      path: "naru04.jpg",
+    },
+    {
+      name: "wilderness",
+      path: "waffu01.jpeg",
+    },
+    {
+      name: "wilderness_uni",
+      path: "waffu02.jpeg",
+    },
+    {
+      name: "river_kani",
+      path: "waffu03.jpeg",
     },
   ];
   private overlayImgList: HTMLImageElement[] = [];
@@ -556,6 +606,10 @@ export default class CardMaker extends Vue {
     this.plays = null;
     this.drawFocusLine(refresh);
     // }
+
+    if (this.sheet_bg) {
+      this.sheet_bg = false;
+    }
   }
 
   @Watch("play")
@@ -567,6 +621,7 @@ export default class CardMaker extends Vue {
 
   @Watch("uniBG")
   onChangeBGImage() {
+    console.log("bgchange");
     this.drawFocusLine(false);
   }
 
@@ -792,6 +847,17 @@ export default class CardMaker extends Vue {
         this.dialog = true;
       }
     });
+  }
+
+  private getInvertedColor(): string {
+    const rgba = this.uniProp.lineColor.rgba;
+    // 明るさの計算(0〜255)
+    const brightness = (rgba.r * 299 + rgba.g * 587 + rgba.b * 114) / 1000;
+    // 明るさの計算(0〜100)
+    const luminance = brightness / 2.55;
+
+    // 基準値(50)より大きい場合は、黒を返し、それ以外は白を返す
+    return luminance > 50 ? "#000000" : "#ffffff";
   }
 
   private closeDialog() {
