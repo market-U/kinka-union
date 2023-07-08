@@ -282,11 +282,16 @@
                 </v-card-actions>
                 <v-card-actions>
                   <v-spacer />
-                  <v-btn href="https://t.co/RU2ekX0HhG" target="blank" color="primary" outlined rounded>
+                  <v-btn href="https://t.co/RU2ekX0HhG" target="blank" color="primary" outlined rounded disabled>
                     <v-icon class="ma-2">mdi-store</v-icon>{{ $t("labels.store_link") }}
                   </v-btn>
                   <v-spacer />
                 </v-card-actions>
+                <v-row justify="center">
+                  <v-col align="center" class="text-caption">
+                    {{ $t("messages.sales_closed") }}
+                  </v-col>
+                </v-row>
               </div>
             </v-card-text>
           </v-card>
