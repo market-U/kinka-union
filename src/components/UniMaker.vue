@@ -152,7 +152,7 @@
                                     ><v-icon>mdi-close</v-icon></v-btn
                                   ></v-card-title
                                 >
-                                <vue-picker v-model="uniProp.lineColor" dot-size="25" swatches-max-height="200">
+                                <vue-picker v-model="uniProp.lineColor" style="min-width: 300px; max-width: 100%">
                                 </vue-picker>
                               </v-card>
                             </v-dialog>
