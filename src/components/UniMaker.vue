@@ -76,16 +76,27 @@
                   @touchstart="uniTouchStart"
                   @touchend="uniTouchEnd"
                   @touchmove="uniTouch"
-                  :style="`width:${uniProp.canvas.width}px; height:${uniProp.canvas.height}px; zoom: ${zoom}; ${
+                  :style="`width:${uniProp.canvas.width}px; height:${
+                    uniProp.canvas.height
+                  }px; zoom: ${zoom}; background-color: ${uniProp.lineColor.hex8}; ${
                     canvas ? 'position:absolute; left: -1920px;' : ''
                   }`"
                 >
                   <v-img
-                    :src="cropedImg"
+                    v-if="uniBG != 0"
+                    :src="overlayImg"
+                    ref="uniPhoto"
                     class="uniPhoto"
                     :width="uniProp.canvas.width"
                     :height="uniProp.canvas.height"
                   />
+                  <!-- <v-img
+                    :src="cropedImg"
+                    ref="uniPhoto"
+                    class="uniPhoto"
+                    :width="uniProp.canvas.width"
+                    :height="uniProp.canvas.height"
+                  /> -->
                   <canvas
                     class="uniCanvas"
                     ref="uniCanvas"
@@ -116,14 +127,14 @@
                       >
                       <v-card-text class="bottomSheet">
                         <v-row class="fill-height">
-                          <v-col cols="4">
-                            <v-menu bottom offset-y>
+                          <v-col cols="4" sm="2" md="1">
+                            <v-dialog bottom offset-y :close-on-content-click="false" v-model="pickerDialog">
                               <template v-slot:activator="{ on, attrs }">
                                 <v-card
                                   tile
                                   v-bind="attrs"
                                   v-on="on"
-                                  :color="uniProp.lineColor.hex"
+                                  :color="uniProp.lineColor.hex8"
                                   height="100%"
                                   @click="uniBG = 0"
                                   style="position: relative"
@@ -137,25 +148,16 @@
                               </template>
                               <v-card :width="dispWidth" class="pa-3">
                                 <v-card-title
-                                  >{{ $t("uni_maker.color") }}<v-spacer /><v-btn icon
+                                  >{{ $t("uni_maker.color") }}<v-spacer /><v-btn icon @click="pickerDialog = false"
                                     ><v-icon>mdi-close</v-icon></v-btn
                                   ></v-card-title
                                 >
-                                <v-color-picker
-                                  v-model="uniProp.lineColor"
-                                  dot-size="25"
-                                  swatches-max-height="140"
-                                  mode="hexa"
-                                  show-swatches
-                                  hide-sliders
-                                  hide-canvas
-                                  hide-inputs
-                                >
-                                </v-color-picker>
+                                <vue-picker v-model="uniProp.lineColor" dot-size="25" swatches-max-height="200">
+                                </vue-picker>
                               </v-card>
-                            </v-menu>
+                            </v-dialog>
                           </v-col>
-                          <v-col cols="4" v-for="(asset, index) in uniBGAssets" :key="asset.name">
+                          <v-col cols="4" sm="2" md="1" v-for="(asset, index) in uniBGAssets" :key="asset.name">
                             <v-card
                               @click="
                                 uniBG = index + 1;
@@ -457,16 +459,19 @@ import { ref } from "vue";
 import VueCropper from "vue-cropperjs";
 import html2canvas from "html2canvas";
 import "cropperjs/dist/cropper.css";
+import { Chrome } from "vue-color";
 
 @Component({
   components: {
     VueCropper,
+    VuePicker: Chrome,
   },
 })
 export default class CardMaker extends Vue {
   @Prop({ required: true }) cardType?: MODEL.CardType;
   private imgSrc = ref();
   private cropedImg?: string | ArrayBuffer | null = "";
+  private cropedImgElement: HTMLImageElement = new Image();
   private file = null;
   private memberNo = "";
   private division = "";
@@ -483,6 +488,7 @@ export default class CardMaker extends Vue {
   private sheet_bg = false;
   private sheet_shape = false;
   private sheet_settings = false;
+  private pickerDialog = false;
   private plays = null;
   private playFrameMS = 100;
   private issueImageScale = 1;
@@ -554,12 +560,14 @@ export default class CardMaker extends Vue {
       amplitude: 50,
       min: 160,
     },
+    lineColorHex8: "#000000FF",
     lineColor: {
-      alpha: 1,
+      a: 1,
       hex: "#000000",
-      hexa: "#000000FF",
-      hue: 0,
-      rgba: { r: 255, g: 0, b: 0, a: 1 },
+      hex8: "#000000FF",
+      hue: 1,
+      hsva: { h: 0, s: 0, v: 0, a: 1 },
+      rgba: { r: 0, g: 0, b: 0, a: 1 },
     },
   };
   get computedUniProp() {
@@ -607,9 +615,9 @@ export default class CardMaker extends Vue {
     this.drawFocusLine(refresh);
     // }
 
-    if (this.sheet_bg) {
-      this.sheet_bg = false;
-    }
+    // if (this.sheet_bg) {
+    //   this.sheet_bg = false;
+    // }
   }
 
   @Watch("play")
@@ -659,7 +667,7 @@ export default class CardMaker extends Vue {
   private uniTouch(event: any) {
     const changedTouchesCount = event.changedTouches.length;
     this.touchCount = event.touches.length;
-    console.log(event);
+    // console.log(event);
     // this.logging = `${touchCount}`;
     if (this.touchCount >= 2) {
       if (!this.pinching) {
@@ -683,7 +691,11 @@ export default class CardMaker extends Vue {
         const x = touch.clientX - bounds.left * this.zoom;
         const y = touch.clientY - bounds.top * this.zoom;
         // console.log("要素内で... x=" + x, "y=" + y);
-        this.uniProp.center = { x: x / this.zoom, y: y / this.zoom };
+        if (
+          Math.abs(this.uniProp.center.x - x / this.zoom) > 10 ||
+          Math.abs(this.uniProp.center.y - y / this.zoom) > 10
+        )
+          this.uniProp.center = { x: x / this.zoom, y: y / this.zoom };
       }
     }
   }
@@ -789,7 +801,10 @@ export default class CardMaker extends Vue {
     // get image data for post processing, e.g. upload or setting image src
     if (this.file !== null) {
       this.cropedImg = this.cropper.getCroppedCanvas().toDataURL();
-      this.drawFocusLine(true);
+      this.cropedImgElement.src = this.cropedImg as string;
+      this.cropedImgElement.onload = () => {
+        this.drawFocusLine(true);
+      };
     }
   }
   private rotate(deg: number) {
@@ -819,6 +834,7 @@ export default class CardMaker extends Vue {
           scale: this.issueImageScale,
           width: this.uniProp.canvas.width,
           height: this.uniProp.canvas.height,
+          backgroundColor: "transparent",
         },
       ];
       const canvasElement = await html2canvas(...params).catch((e) => {
@@ -972,33 +988,37 @@ export default class CardMaker extends Vue {
       [...Array(num)].map(() => this.lines.push(new Liner()));
     };
 
-    const render = (refresh: boolean) => {
-      if (ctx) ctx.globalCompositeOperation = "source-over";
+    const render2 = (refresh: boolean, img?: HTMLImageElement) => {
       ctx?.clearRect(0, 0, canvas.width, canvas.height);
+      if (ctx && img) {
+        ctx.globalCompositeOperation = "source-over";
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      }
+      if (ctx) ctx.globalCompositeOperation = "destination-out";
       this.lines.forEach((l) => {
         l.setColor(lineColor);
         l.render(refresh);
       });
-      if (this.imageOverlay) {
-        if (ctx) ctx.globalCompositeOperation = "source-in";
-        const [width, height] = [this.overlayImg.width, this.overlayImg.height];
-        let origin = { x: 0, y: 0 };
-        if (width - height > 0) {
-          // 高さの方が短い
-          // 比率チェック
-          const scale = canvas.height / height;
-          const gap = (width * scale - canvas.width) / 2;
-          ctx?.drawImage(this.overlayImg, gap * -1, 0, width * scale, canvas.height);
-        } else {
-          // 幅の方が短い
-          const scale = canvas.width / width;
-          const gap = (height * scale - canvas.height) / 2;
-          ctx?.drawImage(this.overlayImg, 0, gap * -1, canvas.height, height * scale);
-        }
-      }
+      // if (this.imageOverlay) {
+      //   if (ctx) ctx.globalCompositeOperation = "source-in";
+      //   const [width, height] = [this.overlayImg.width, this.overlayImg.height];
+      //   // let origin = { x: 0, y: 0 };
+      //   if (width - height > 0) {
+      //     // 高さの方が短い
+      //     // 比率チェック
+      //     const scale = canvas.height / height;
+      //     const gap = (width * scale - canvas.width) / 2;
+      //     ctx?.drawImage(this.overlayImg, gap * -1, 0, width * scale, canvas.height);
+      //   } else {
+      //     // 幅の方が短い
+      //     const scale = canvas.width / width;
+      //     const gap = (height * scale - canvas.height) / 2;
+      //     ctx?.drawImage(this.overlayImg, 0, gap * -1, canvas.height, height * scale);
+      //   }
+      // }
       if (this.play)
         setTimeout(() => {
-          if (this.play) render(refresh);
+          if (this.play) render2(refresh, img);
         }, this.playFrameMS);
     };
 
@@ -1006,7 +1026,11 @@ export default class CardMaker extends Vue {
     if (shouldRefresh) {
       createLines(lineNum);
     }
-    render(shouldRefresh);
+    if (this.cropedImg) {
+      render2(shouldRefresh, this.cropedImgElement);
+    } else {
+      render2(shouldRefresh);
+    }
   }
 
   get orgNameHashTag(): string {

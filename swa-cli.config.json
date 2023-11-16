@@ -3,6 +3,8 @@
   "configurations": {
     "kinka-union": {
       "appLocation": ".",
+      "apiBuildCommand": "npm run build",
+      "apiLocation": "api",
       "outputLocation": "docs",
       "appBuildCommand": "npm run build",
       "run": "npm run serve",
