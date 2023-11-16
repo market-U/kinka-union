@@ -84,7 +84,7 @@
                 >
                   <v-img
                     v-if="uniBG != 0"
-                    :src="overlayImg"
+                    :src="require(`@/assets/${overlayImg}`)"
                     ref="uniPhoto"
                     class="uniPhoto"
                     :width="uniProp.canvas.width"
@@ -777,11 +777,18 @@ export default class CardMaker extends Vue {
       return Math.min((this.mdColWidth - marginTortalm) / previewOriginalWidth, maxZoom);
     }
   }
-  get overlayImg(): HTMLImageElement {
+  // get overlayImg(): HTMLImageElement {
+  //   if (this.uniBG > 0 && this.uniBG <= this.overlayImgList.length) {
+  //     return this.overlayImgList[this.uniBG - 1];
+  //   } else {
+  //     return this.overlayImgList[0];
+  //   }
+  // }
+  get overlayImg(): string {
     if (this.uniBG > 0 && this.uniBG <= this.overlayImgList.length) {
-      return this.overlayImgList[this.uniBG - 1];
+      return this.uniBGAssets[this.uniBG - 1].path;
     } else {
-      return this.overlayImgList[0];
+      return this.uniBGAssets[0].path;
     }
   }
   private onChangeFileInput() {
