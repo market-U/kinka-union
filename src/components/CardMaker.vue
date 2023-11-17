@@ -740,7 +740,7 @@ ${this.appNameHashTag}
             .share({
               text: `${this.shareText}
 ${location.protocol}//${location.host}${location.pathname}`,
-              files: [new File([blob], "card.png", { type: "image/png" })],
+              files: [new File([blob], "card.png", { type: "text/plain" })],
             })
             .then(() => {
               console.log("Share was successful.");
