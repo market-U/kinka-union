@@ -494,6 +494,10 @@ export default class CardMaker extends Vue {
   private issueImageScale = 1;
   private uniBGAssets = [
     {
+      name: "snow",
+      path: "snow_dome.png",
+    },
+    {
       name: "sea",
       path: "uniBG03.png",
     },
