@@ -115,30 +115,57 @@
                 </div>
                 <div
                   class="photoPreview"
+                  :class="ema ? 'ema' : ''"
                   :style="`filter: contrast(${imgContrast}%) brightness(${imgBrightness}%)`"
                 ></div>
-                <div class="infoPreview pa-10" :style="`color: ${cardType.colors.card_info_font};`">
+                <div
+                  class="infoPreview pa-10"
+                  v-if="cardType.bird_type != 'ema'"
+                  :style="`color: ${cardType.colors.card_info_font};`"
+                >
                   <v-card-title class="memberNo ma-2">{{ numberLabel }} {{ memberNo }}</v-card-title>
                   <v-card-title class="division ma-2">{{ divisionLabel }}</v-card-title>
                   <div class="memberName" :style="memberNameStyle">{{ memberName }}</div>
+                </div>
+                <!-- 絵馬 -->
+                <div
+                  v-else
+                  class="infoPreview ema"
+                  :class="vertical ? 'vertical' : ''"
+                  :style="`color: ${cardType.colors.card_info_font};`"
+                >
+                  <div class="memberName spanStyle" :style="memberNameStyle">
+                    {{ memberName }}
+                  </div>
                 </div>
                 <v-img class="cardOverlay" ref="overlayImg" v-show="cardOverlay" :src="overlayImgSrc" />
               </div>
             </div>
           </v-col>
           <v-col>
-            <v-text-field :label="numberLabel" v-model="memberNo" />
-            <div class="d-flex flex-column">
-              <v-text-field :label="$t('labels.division_name')" v-model="division" />
-              <div class="d-flex justify-end">
-                <v-checkbox v-model="hideDivision" style="margin-top: -20px; margin-bottom: -20px">
-                  <div slot="label">
-                    <div class="text-caption">{{ $t("labels.hide_division") }}</div>
-                  </div>
-                </v-checkbox>
+            <div v-if="!ema">
+              <v-text-field :label="numberLabel" v-model="memberNo" />
+              <div class="d-flex flex-column">
+                <v-text-field :label="$t('labels.division_name')" v-model="division" />
+                <div class="d-flex justify-end">
+                  <v-checkbox v-model="hideDivision" style="margin-top: -20px; margin-bottom: -20px">
+                    <div slot="label">
+                      <div class="text-caption">{{ $t("labels.hide_division") }}</div>
+                    </div>
+                  </v-checkbox>
+                </div>
               </div>
+              <v-text-field :label="$t('labels.member_name')" v-model="memberName" />
             </div>
-            <v-text-field :label="$t('labels.member_name')" v-model="memberName" />
+            <!-- 絵馬の入力 -->
+            <div v-else class="pt-10">
+              <v-textarea filled auto-grow :label="$t('labels.wishes')" v-model="memberName"> </v-textarea>
+            </div>
+            <v-checkbox v-model="vertical">
+              <div slot="label">
+                <div class="text-caption">{{ $t("labels.vertical_writing") }}</div>
+              </div>
+            </v-checkbox>
           </v-col>
         </v-row>
         <v-row>
@@ -153,13 +180,18 @@
                 "
                 :disabled="!filled"
                 color="primary"
-                ><v-icon class="mr-2">mdi-smart-card-outline</v-icon>{{ $t("common.issue") }}</v-btn
-              >
+                ><v-icon class="mr-2">mdi-smart-card-outline</v-icon>
+                <div v-if="ema">{{ $t("labels.dedication") }}</div>
+                <div v-else>{{ $t("common.issue") }}</div>
+              </v-btn>
             </v-card-actions>
           </v-col>
         </v-row>
       </v-stepper-content>
-      <v-stepper-step step="3">{{ $t("common.issue") }}</v-stepper-step>
+      <v-stepper-step step="3">
+        <div v-if="ema">{{ $t("labels.dedication") }}</div>
+        <div v-else>{{ $t("common.issue") }}</div>
+      </v-stepper-step>
       <v-stepper-content step="3">
         <v-card-title align="center" class="text-subtitle-1 font-weight-bold">
           <v-spacer />
@@ -365,6 +397,17 @@
   border-radius: 24px;
   background-color: white;
 }
+
+.photoPreview.ema {
+  width: 403px;
+  height: 537px;
+  overflow: hidden;
+  position: absolute;
+  top: 500px;
+  left: 310px;
+  border-radius: 10px;
+  background-color: white;
+}
 .infoPreview {
   width: 976px;
   height: 632px;
@@ -380,6 +423,19 @@
   font-family: "Murecho";
   font-weight: 300;
   -webkit-text-size-adjust: auto;
+}
+.infoPreview.ema {
+  width: 800px;
+  height: 580px;
+  top: 460px;
+  left: 746px;
+  border-radius: 0px;
+  padding: 0;
+  background-color: transparent;
+}
+.vertical {
+  writing-mode: vertical-rl;
+  text-align: left;
 }
 .memberNo {
   font-size: 60px;
@@ -398,6 +454,17 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+}
+.ema > .memberName {
+  font-weight: 500;
+  text-align: left;
+  flex-grow: 1;
+  font-size: 74px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  white-space: pre-line;
 }
 .cropper {
   max-width: 400px;
@@ -426,6 +493,7 @@ import { NavigationGuardNext, Route } from "vue-router";
 })
 export default class CardMaker extends Vue {
   @Prop({ required: true }) cardType?: MODEL.CardType;
+  private vertical = true;
   private imgSrc = ref();
   private overlayImgSrc? = ref();
   private cropedImg?: string | ArrayBuffer | null = "";
@@ -492,7 +560,11 @@ export default class CardMaker extends Vue {
   }
 
   get profileFilled(): boolean {
-    return this.memberNo !== "" && this.memberName !== "" && (this.hideDivision || this.division !== "");
+    if (this.ema) {
+      return this.memberName !== "";
+    } else {
+      return this.memberNo !== "" && this.memberName !== "" && (this.hideDivision || this.division !== "");
+    }
   }
 
   get filled(): boolean {
@@ -767,6 +839,10 @@ ${location.protocol}//${location.host}${location.pathname}`,
       .catch((e) => {
         console.error(e);
       });
+  }
+
+  get ema(): boolean {
+    return this.cardType ? this.cardType.bird_type == "ema" : false;
   }
 }
 </script>

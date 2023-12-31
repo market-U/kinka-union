@@ -76,6 +76,13 @@
       "membership_no": "Resident number",
       "card": "Certificate of residence",
       "card_title": "Certificate of residence"
+    },
+    "ema": {
+      "name": "{msg} Fan Club",
+      "member": "Member",
+      "membership_no": "Membership No.",
+      "card": "Membership card",
+      "card_title": "HATCHAN FAN CLUB"
     }
   },
   "bird": {

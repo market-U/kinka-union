@@ -30,7 +30,10 @@
     "apply_card": "この画像でカードを申し込む",
     "upload_data": "カード製作用データのアップロード",
     "copy_url": "URLをコピーする",
-    "store_link": "販売サイトはこちら"
+    "store_link": "販売サイトはこちら",
+    "vertical_writing": "縦書き",
+    "wishes": "願いごと",
+    "dedication": "奉納"
   },
   "messages": {
     "select_photo": "{member}のお写真を選択してください",
@@ -76,13 +79,21 @@
       "membership_no": "住民番号",
       "card": "住民票",
       "card_title": "住民票"
+    },
+    "ema": {
+      "name": "{msg}奉納所",
+      "member": "参拝者",
+      "membership_no": "会員番号",
+      "card": "会員証",
+      "card_title": ""
     }
   },
   "bird": {
     "kinka": "キンカ",
     "buncho": "文鳥",
     "hatchan": "はっちゃん",
-    "uni": "ウニ"
+    "uni": "ウニ",
+    "ema": "絵馬"
   },
   "uni_maker": {
     "app_name": "ウニメーカー",

@@ -42,6 +42,8 @@ export default class CardMakerView extends Vue {
       this.type = MODEL.buncho;
     } else if (type === "hatchan") {
       this.type = MODEL.hatchan;
+    } else if (type === "ema") {
+      this.type = MODEL.ema;
     } else {
       this.type = MODEL.kinka;
     }
