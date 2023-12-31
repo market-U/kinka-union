@@ -477,7 +477,7 @@
   justify-content: center;
   align-items: center;
   white-space: pre-line;
-  font-family: "sans-serif";
+  font-family: sans-serif;
 }
 .cropper {
   max-width: 400px;
