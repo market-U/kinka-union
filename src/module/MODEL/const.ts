@@ -88,3 +88,24 @@ export const uni: CardType = {
     accent: "#e97878",
   },
 } as const;
+
+export const ema: CardType = {
+  organization_type: "ema",
+  bird_type: "ema",
+  component: "card/",
+  assets: {
+    card_bg: "cardBG_ema.png",
+    default_photo: "ema_icon.png",
+    // overlay: "frame_hatsuki.png",
+  },
+  colors: {
+    card_info_font: "#6c4228",
+    default_photo_bg: "#FFD8D8",
+    title_font: "#6c4228",
+  },
+  theme: {
+    primary: "#F70A38",
+    secondary: "#ff7272",
+    accent: "#282828",
+  },
+} as const;

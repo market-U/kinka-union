@@ -21,6 +21,7 @@
   "labels": {
     "photo_section_title": "お写真選択",
     "input_profile": "プロフィール入力",
+    "input_wishes": "願いごと入力",
     "card_preview": "プレビュー",
     "division_name": "支部名",
     "member_name": "おなまえ",
@@ -30,11 +31,15 @@
     "apply_card": "この画像でカードを申し込む",
     "upload_data": "カード製作用データのアップロード",
     "copy_url": "URLをコピーする",
-    "store_link": "販売サイトはこちら"
+    "store_link": "販売サイトはこちら",
+    "vertical_writing": "縦書き",
+    "wishes": "願いごと",
+    "dedication": "奉納"
   },
   "messages": {
     "select_photo": "{member}のお写真を選択してください",
     "card_issued": "＼{card}を発行しました！／",
+    "ema_dedicated": "＼{card}を奉納しました！／",
     "card_copy_issued": "{card}の原稿を発行しました！",
     "save_image": "長押しや右クリックで画像を保存できます。",
     "share_image": "保存した画像を添付してツイートしよう！",
@@ -76,13 +81,21 @@
       "membership_no": "住民番号",
       "card": "住民票",
       "card_title": "住民票"
+    },
+    "ema": {
+      "name": "{msg}奉納所",
+      "member": "参拝者",
+      "membership_no": "会員番号",
+      "card": "絵馬",
+      "card_title": ""
     }
   },
   "bird": {
     "kinka": "キンカ",
     "buncho": "文鳥",
     "hatchan": "はっちゃん",
-    "uni": "ウニ"
+    "uni": "ウニ",
+    "ema": "絵馬"
   },
   "uni_maker": {
     "app_name": "ウニメーカー",

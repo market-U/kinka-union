@@ -75,7 +75,7 @@ import { CardType } from "./module/MODEL";
 export default class App extends Vue {
   private selectedLocaleIndex = 0;
   private drawer = false;
-  private menuItems: CardType[] = [MODEL.kinka, MODEL.buncho, MODEL.hatchan, MODEL.uni];
+  private menuItems: CardType[] = [MODEL.kinka, MODEL.buncho, MODEL.hatchan, MODEL.uni, MODEL.ema];
   get mobile(): boolean {
     return this.$vuetify.breakpoint.mobile;
   }

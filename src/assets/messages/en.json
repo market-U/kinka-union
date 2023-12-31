@@ -21,6 +21,7 @@
   "labels": {
     "photo_section_title": "Face Photo",
     "input_profile": "Profile",
+    "input_wishes": "Wishes",
     "card_preview": "Card Preview",
     "division_name": "Branch",
     "member_name": "Member Name",
@@ -30,11 +31,15 @@
     "apply_card": "apply a real card",
     "upload_data": "Upload Card Image",
     "copy_url": "Copy URL",
-    "store_link": "Go to Sales Website"
+    "store_link": "Go to Sales Website",
+    "vertical_writing": "Vertical Writing",
+    "wishes": "Wishes",
+    "dedication": "Dedicate"
   },
   "messages": {
     "select_photo": "Select {member}'s photo.",
     "card_issued": "＼Your {card} has been issued.／",
+    "ema_dedicated": "＼Your {card} has been dedicated.／",
     "card_copy_issued": "The copy of {card} has been created.",
     "save_image": "Save the image by pressing and holding the screen or right-clicking the mouse.",
     "share_image": "Attach your saved image and tweet it!",
@@ -76,13 +81,21 @@
       "membership_no": "Resident number",
       "card": "Certificate of residence",
       "card_title": "Certificate of residence"
+    },
+    "ema": {
+      "name": "{msg} Dedication Place",
+      "member": "Visitor",
+      "membership_no": "Membership No.",
+      "card": "Ema",
+      "card_title": ""
     }
   },
   "bird": {
     "kinka": "Kinka",
     "buncho": "Buncho",
     "hatchan": "Hatchan",
-    "uni": "Urchin"
+    "uni": "Urchin",
+    "ema": "Ema"
   },
   "uni_maker": {
     "app_name": "UrchinMaker",
