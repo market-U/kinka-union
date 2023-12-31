@@ -86,7 +86,12 @@
         </v-row>
       </v-stepper-content>
       <v-stepper-step step="2" editable :complete="profileFilled" edit-icon="$complete">
-        {{ $t("labels.input_profile") }}
+        <span v-if="ema">
+          {{ $t("labels.input_wishes") }}
+        </span>
+        <span v-else>
+          {{ $t("labels.input_profile") }}
+        </span>
       </v-stepper-step>
       <v-stepper-content step="2">
         <v-row>
@@ -161,7 +166,7 @@
             <div v-else class="pt-10">
               <v-textarea filled auto-grow :label="$t('labels.wishes')" v-model="memberName"> </v-textarea>
             </div>
-            <v-checkbox v-model="vertical">
+            <v-checkbox v-model="vertical" v-show="false">
               <div slot="label">
                 <div class="text-caption">{{ $t("labels.vertical_writing") }}</div>
               </div>
@@ -195,7 +200,14 @@
       <v-stepper-content step="3">
         <v-card-title align="center" class="text-subtitle-1 font-weight-bold">
           <v-spacer />
-          <span>
+          <span v-if="ema">
+            {{
+              $t("messages.ema_dedicated", {
+                card: $t(`organization.${cardType.organization_type}.card`).toString().toLowerCase(),
+              })
+            }}
+          </span>
+          <span v-else>
             {{
               $t("messages.card_issued", {
                 card: $t(`organization.${cardType.organization_type}.card`).toString().toLowerCase(),
@@ -245,12 +257,12 @@
           <v-spacer />
           <v-btn @click="step = 2"><v-icon>mdi-undo</v-icon>{{ $t("common.back") }}</v-btn>
         </v-card-actions>
-        <v-card-title align="center" class="text-subtitle-1 font-weight-bold">
+        <v-card-title align="center" class="text-subtitle-1 font-weight-bold" v-show="false">
           <v-spacer />
           <span>{{ $t("messages.for_purchase") }}</span>
           <v-spacer />
         </v-card-title>
-        <v-card-text align="center">
+        <v-card-text align="center" v-show="false">
           <v-spacer />
           <v-btn @click="dialog = true" color="primary" rounded>
             <v-icon>mdi-credit-card-fast</v-icon>{{ $t("labels.apply_card") }}</v-btn
@@ -456,7 +468,7 @@
   align-items: center;
 }
 .ema > .memberName {
-  font-weight: 500;
+  font-weight: bold;
   text-align: left;
   flex-grow: 1;
   font-size: 74px;
@@ -465,6 +477,7 @@
   justify-content: center;
   align-items: center;
   white-space: pre-line;
+  font-family: "sans-serif";
 }
 .cropper {
   max-width: 400px;
@@ -493,7 +506,7 @@ import { NavigationGuardNext, Route } from "vue-router";
 })
 export default class CardMaker extends Vue {
   @Prop({ required: true }) cardType?: MODEL.CardType;
-  private vertical = true;
+  private vertical = false;
   private imgSrc = ref();
   private overlayImgSrc? = ref();
   private cropedImg?: string | ArrayBuffer | null = "";
@@ -780,7 +793,14 @@ export default class CardMaker extends Vue {
   }
 
   get shareText(): string {
-    return `${this.$t("common.welcome_msg", { msg: this.organizationName })}!!
+    if (this.ema) {
+      return `${this.memberName}
+
+${this.orgNameHashTag}
+${this.appNameHashTag}
+`;
+    } else {
+      return `${this.$t("common.welcome_msg", { msg: this.organizationName })}!!
 
 ${this.numberLabel} ${this.memberNo}
 ${this.divisionLabel}
@@ -789,6 +809,7 @@ ${this.memberName}
 ${this.orgNameHashTag}
 ${this.appNameHashTag}
 `;
+    }
   }
 
   get shareTextEncoded(): string {

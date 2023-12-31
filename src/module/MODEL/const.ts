@@ -95,7 +95,7 @@ export const ema: CardType = {
   component: "card/",
   assets: {
     card_bg: "cardBG_ema.png",
-    default_photo: "dot_hatsuki.png",
+    default_photo: "ema_icon.png",
     // overlay: "frame_hatsuki.png",
   },
   colors: {
