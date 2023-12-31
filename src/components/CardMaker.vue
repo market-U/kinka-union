@@ -552,7 +552,11 @@ export default class CardMaker extends Vue {
   @Watch("cardType")
   onChangeCardType() {
     this.setUpImgSrc();
-    this.step = 2;
+    if (this.file != null) {
+      this.step = 2;
+    } else {
+      this.step = 1;
+    }
   }
 
   private setUpImgSrc() {
