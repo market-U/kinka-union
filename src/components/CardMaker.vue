@@ -348,7 +348,7 @@
                   </v-btn>
                   <v-spacer />
                 </v-card-actions>
-                <v-row justify="center">
+                <v-row justify="center" v-show="!MODE_APPLY_CARD">
                   <v-col align="center" class="text-caption">
                     {{ $t("messages.sales_closed") }}
                   </v-col>
