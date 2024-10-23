@@ -4,7 +4,7 @@ export const kinka: CardType = {
   bird_type: "kinka",
   component: "card/",
   assets: {
-    card_bg: "cardBG.png",
+    card_bg: ["cardBG.png"],
     default_photo: "dot_kinka.png",
     logo: "logo_kinka.png",
   },
@@ -25,7 +25,7 @@ export const buncho: CardType = {
   bird_type: "buncho",
   component: "card/",
   assets: {
-    card_bg: "cardBG_bun.png",
+    card_bg: ["cardBG_bun.png", "cardBG_bun2.png", "cardBG_bun3.png"],
     default_photo: "dot_bun.png",
     logo: "logo_bun.png",
   },
@@ -46,7 +46,7 @@ export const hatchan: CardType = {
   bird_type: "hatchan",
   component: "card/",
   assets: {
-    card_bg: "cardBG_hatsuki.png",
+    card_bg: ["cardBG_hatsuki.png"],
     default_photo: "dot_hatsuki.png",
     overlay: "frame_hatsuki.png",
   },
@@ -70,7 +70,7 @@ export const uni: CardType = {
   bird_type: "uni",
   component: "",
   assets: {
-    card_bg: "cardBG_hatsuki.png",
+    card_bg: ["cardBG_hatsuki.png"],
     default_photo: "unikinka.png",
     overlay: "frame_hatsuki.png",
   },
@@ -94,7 +94,7 @@ export const ema: CardType = {
   bird_type: "ema",
   component: "card/",
   assets: {
-    card_bg: "cardBG_ema.png",
+    card_bg: ["cardBG_ema.png"],
     default_photo: "ema_icon.png",
     // overlay: "frame_hatsuki.png",
   },
