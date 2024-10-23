@@ -4,7 +4,7 @@ export interface CardType {
   component: string;
   assets: {
     default_photo: string;
-    card_bg: string;
+    card_bg: ReadonlyArray<string>;
     logo?: string;
     overlay?: string;
   };

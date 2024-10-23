@@ -49,17 +49,21 @@
               <v-btn @click="rotate(-90)" :disabled="!file" icon color="primary"
                 ><v-icon>mdi-file-rotate-left</v-icon></v-btn
               >
-              <v-btn @click="rotate(90)" :disabled="!file" icon color="primary"
+              <v-btn v-show="false" @click="rotate(90)" :disabled="!file" icon color="primary"
                 ><v-icon>mdi-file-rotate-right</v-icon></v-btn
               >
-              <v-btn @click="move(-10, 0)" :disabled="!file" icon color="primary"
+              <v-btn v-show="false" @click="move(-10, 0)" :disabled="!file" icon color="primary"
                 ><v-icon>mdi-arrow-left</v-icon></v-btn
               >
-              <v-btn @click="move(10, 0)" :disabled="!file" icon color="primary"
+              <v-btn v-show="false" @click="move(10, 0)" :disabled="!file" icon color="primary"
                 ><v-icon>mdi-arrow-right</v-icon></v-btn
               >
-              <v-btn @click="move(0, -10)" :disabled="!file" icon color="primary"><v-icon>mdi-arrow-up</v-icon></v-btn>
-              <v-btn @click="move(0, 10)" :disabled="!file" icon color="primary"><v-icon>mdi-arrow-down</v-icon></v-btn>
+              <v-btn v-show="false" @click="move(0, -10)" :disabled="!file" icon color="primary"
+                ><v-icon>mdi-arrow-up</v-icon></v-btn
+              >
+              <v-btn v-show="false" @click="move(0, 10)" :disabled="!file" icon color="primary"
+                ><v-icon>mdi-arrow-down</v-icon></v-btn
+              >
               <v-btn @click="relativeZoom(0.1)" :disabled="!file" icon color="primary"
                 ><v-icon>mdi-magnify-plus</v-icon></v-btn
               >
@@ -106,7 +110,7 @@
               :style="`zoom: ${zoom}; ${canvas ? 'position:absolute; left: -1920px;' : ''}`"
             >
               <div class="cardPreview" ref="cardPreview">
-                <v-img :src="require(`../assets/${cardType.assets.card_bg}`)" @load="cardBGLoaded()" />
+                <v-img :src="require(`../assets/${cardType.assets.card_bg[bgId]}`)" @load="cardBGLoaded()" />
                 <div class="cardTitle" :style="titleStyleString">
                   {{ $t(`organization.${cardType.organization_type}.card_title`) }}
                 </div>
@@ -146,6 +150,15 @@
                 <v-img class="cardOverlay" ref="overlayImg" v-show="cardOverlay" :src="overlayImgSrc" />
               </div>
             </div>
+            <v-row v-show="cardType.assets.card_bg.length > 1">
+              <v-col cols="4" sm="2" md="1" v-for="(asset, index) in cardType.assets.card_bg" :key="`assets-${index}`">
+                <v-card @click="bgId = index" tile>
+                  <div :style="index == bgId ? 'border: 3px solid red;' : 'border: 3px solid transparent;'">
+                    <v-img :src="require(`@/assets/${asset}`)" aspect-ratio="1.5"></v-img>
+                  </div>
+                </v-card>
+              </v-col>
+            </v-row>
           </v-col>
           <v-col>
             <div v-if="!ema">
@@ -257,12 +270,12 @@
           <v-spacer />
           <v-btn @click="step = 2"><v-icon>mdi-undo</v-icon>{{ $t("common.back") }}</v-btn>
         </v-card-actions>
-        <v-card-title align="center" class="text-subtitle-1 font-weight-bold" v-show="false">
+        <v-card-title align="center" class="text-subtitle-1 font-weight-bold" v-show="MODE_APPLY_CARD">
           <v-spacer />
           <span>{{ $t("messages.for_purchase") }}</span>
           <v-spacer />
         </v-card-title>
-        <v-card-text align="center" v-show="false">
+        <v-card-text align="center" v-show="MODE_APPLY_CARD">
           <v-spacer />
           <v-btn @click="dialog = true" color="primary" rounded>
             <v-icon>mdi-credit-card-fast</v-icon>{{ $t("labels.apply_card") }}</v-btn
@@ -326,7 +339,7 @@
                 </v-card-actions>
                 <v-card-actions>
                   <v-spacer />
-                  <v-btn href="https://t.co/RU2ekX0HhG" target="blank" color="primary" outlined rounded disabled>
+                  <v-btn href="https://t.co/RU2ekX0HhG" target="blank" color="primary" outlined rounded>
                     <v-icon class="ma-2">mdi-store</v-icon>{{ $t("labels.store_link") }}
                   </v-btn>
                   <v-spacer />
@@ -530,6 +543,10 @@ export default class CardMaker extends Vue {
   private imgBrightness = 100;
   private imgContrast = 100;
   private shareLoading = false;
+  private bgId = 0;
+  private blob: Blob | null = null;
+
+  private MODE_APPLY_CARD = true;
 
   created() {
     // const staff = this.$route.query.staff;
@@ -551,6 +568,7 @@ export default class CardMaker extends Vue {
 
   @Watch("cardType")
   onChangeCardType() {
+    this.bgId = 0;
     this.setUpImgSrc();
     if (this.file != null) {
       this.step = 2;
@@ -658,17 +676,30 @@ export default class CardMaker extends Vue {
 
   private async createCardImage(download: boolean) {
     this.canvas = true;
+    this.blob = null;
     Vue.nextTick(async () => {
-      const preview: HTMLElement = this.$refs.cardFrame as HTMLElement;
-      const params: Parameters<typeof html2canvas> = [preview, { scale: 1 }];
-      const canvasElement = await html2canvas(...params).catch((e) => {
+      const frame: HTMLElement = this.$refs.cardFrame as HTMLElement;
+      const preview: HTMLElement = this.$refs.cardPreview as HTMLElement;
+      const paramsFrame: Parameters<typeof html2canvas> = [frame, { scale: 1 }];
+      const paramsPreview: Parameters<typeof html2canvas> = [preview, { scale: 1 }];
+      const canvasElement = await html2canvas(...paramsFrame).catch((e) => {
         console.error(e);
         return;
       });
       if (!canvasElement) {
         return;
       }
+      const canvasElementForUpload = await html2canvas(...paramsPreview).catch((e) => {
+        console.error(e);
+        return;
+      });
+      if (!canvasElementForUpload) {
+        return;
+      }
       const dataURL = canvasElement.toDataURL("image/png");
+      canvasElementForUpload.toBlob((blob) => {
+        this.blob = blob;
+      });
       this.canvas = false;
       if (download) {
         let link = document.createElement("a");
@@ -690,22 +721,29 @@ export default class CardMaker extends Vue {
     return await (await fetch(dataUrl)).blob();
   }
 
+  /**
+   * カードのBlobイメージを取得する
+   * @param copy
+   */
   private async getCardBlob(copy: boolean): Promise<Blob | null> {
-    const preview: HTMLElement = copy ? (this.$refs.cardPreview as HTMLElement) : (this.$refs.cardFrame as HTMLElement);
-    const params: Parameters<typeof html2canvas> = [preview, { scale: 1 }];
-    const canvasElement = await html2canvas(...params).catch((e) => {
-      console.error(e);
-      this.uploading = false;
-      return null;
-    });
-    if (!canvasElement) {
-      console.error("canvasElement not found");
-      return null;
-    }
+    // const preview: HTMLElement = copy ? (this.$refs.cardPreview as HTMLElement) : (this.$refs.cardFrame as HTMLElement);
+    // const params: Parameters<typeof html2canvas> = [preview, { scale: 1 }];
+    // const canvasElement = await html2canvas(...params).catch((e) => {
+    //   console.error(e);
+    //   this.uploading = false;
+    //   return null;
+    // });
+    // if (!canvasElement) {
+    //   console.error("canvasElement not found");
+    //   return null;card_bg
+    // }
+    // return new Promise((resolve, reject) => {
+    //   canvasElement.toBlob((blob) => {
+    //     resolve(blob);
+    //   });
+    // });
     return new Promise((resolve, reject) => {
-      canvasElement.toBlob((blob) => {
-        resolve(blob);
-      });
+      resolve(this.blob);
     });
   }
 
