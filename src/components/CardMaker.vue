@@ -151,9 +151,13 @@
               </div>
             </div>
             <v-row v-show="cardType.assets.card_bg.length > 1">
-              <v-col cols="4" sm="2" md="1" v-for="(asset, index) in cardType.assets.card_bg" :key="`assets-${index}`">
+              <v-col cols="4" sm="3" v-for="(asset, index) in cardType.assets.card_bg" :key="`assets-${index}`">
                 <v-card @click="bgId = index" tile>
-                  <div :style="index == bgId ? 'border: 3px solid red;' : 'border: 3px solid transparent;'">
+                  <div
+                    :style="
+                      index == bgId ? `border: 3px solid ${cardType.theme.primary};` : 'border: 3px solid transparent;'
+                    "
+                  >
                     <v-img :src="require(`@/assets/${asset}`)" aspect-ratio="1.5"></v-img>
                   </div>
                 </v-card>
