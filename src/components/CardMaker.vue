@@ -274,12 +274,12 @@
           <v-spacer />
           <v-btn @click="step = 2"><v-icon>mdi-undo</v-icon>{{ $t("common.back") }}</v-btn>
         </v-card-actions>
-        <v-card-title align="center" class="text-subtitle-1 font-weight-bold" v-show="MODE_APPLY_CARD">
+        <v-card-title align="center" class="text-subtitle-1 font-weight-bold" v-show="MODE_APPLY_CARD && !ema">
           <v-spacer />
           <span>{{ $t("messages.for_purchase") }}</span>
           <v-spacer />
         </v-card-title>
-        <v-card-text align="center" v-show="MODE_APPLY_CARD">
+        <v-card-text align="center" v-show="MODE_APPLY_CARD && !ema">
           <v-spacer />
           <v-btn @click="dialog = true" color="primary" rounded>
             <v-icon>mdi-credit-card-fast</v-icon>{{ $t("labels.apply_card") }}</v-btn
