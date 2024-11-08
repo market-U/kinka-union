@@ -110,7 +110,8 @@
               :style="`zoom: ${zoom}; ${canvas ? 'position:absolute; left: -1920px;' : ''}`"
             >
               <div class="cardPreview" ref="cardPreview">
-                <v-img :src="require(`../assets/${cardType.assets.card_bg[bgId]}`)" @load="cardBGLoaded()" />
+                <v-img :src="bgImgSrc" @load="cardBGLoaded()" />
+                <!-- <v-img :src="require(`@/assets/${cardType.assets.card_bg[bgId]}`)" @load="cardBGLoaded()" /> -->
                 <div class="cardTitle" :style="titleStyleString">
                   {{ $t(`organization.${cardType.organization_type}.card_title`) }}
                 </div>
@@ -525,6 +526,7 @@ export default class CardMaker extends Vue {
   @Prop({ required: true }) cardType?: MODEL.CardType;
   private vertical = false;
   private imgSrc = ref();
+  private bgImgSrc = ref();
   private overlayImgSrc? = ref();
   private cropedImg?: string | ArrayBuffer | null = "";
   private file = null;
@@ -581,7 +583,13 @@ export default class CardMaker extends Vue {
     }
   }
 
+  @Watch("bgId")
+  onChangeBgId() {
+    this.bgImgSrc = require(`@/assets/${this.cardType?.assets.card_bg[this.bgId]}`);
+  }
+
   private setUpImgSrc() {
+    this.bgImgSrc = require(`@/assets/${this.cardType?.assets.card_bg[this.bgId]}`);
     this.imgSrc = require(`@/assets/${this.cardType?.assets.default_photo}`);
     if (this.cardOverlay) {
       this.overlayImgSrc = require(`@/assets/${this.cardOverlay}`);
@@ -679,6 +687,10 @@ export default class CardMaker extends Vue {
   }
 
   private async createCardImage(download: boolean) {
+    // api起こす
+    if (this.MODE_APPLY_CARD) {
+      this.fetchCredential();
+    }
     this.canvas = true;
     this.blob = null;
     Vue.nextTick(async () => {
@@ -769,6 +781,10 @@ export default class CardMaker extends Vue {
 
   private generateUUID(): string {
     return uuidv4();
+  }
+
+  private fetchCredential(): void {
+    fetch("/api/credentials");
   }
 
   private async uploadImgToBlobStorage(blob: Blob): Promise<void> {
