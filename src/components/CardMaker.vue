@@ -552,7 +552,7 @@ export default class CardMaker extends Vue {
   private bgId = 0;
   private blob: Blob | null = null;
 
-  private MODE_APPLY_CARD = true;
+  private MODE_APPLY_CARD = false;
 
   created() {
     // const staff = this.$route.query.staff;
